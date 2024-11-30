@@ -38,7 +38,7 @@ Here is an example of good structure:
 - These files will be collected by application and provided as context to each prompt for LLM
 
 ### Listen:
-  - Run `AITextWriter.ListenChanges` with arguments:
+  - Run `AITextWriter.Listen` with arguments:
     - `--working-folder` - path to working folder
     - `--model` - model name (optional, if empty will be used default depending on LLM api)
     - `--verbose` - show output (optional, default is `false`)
@@ -66,7 +66,7 @@ Here is an example of good structure:
 
 ### Process:
   - Prompt creation rules is same as for ListenChanges, but you need to call AITextWriter.ProcessSingle to get results:
-    - Run `AITextWriter.ProcessSingle` with arguments:
+    - Run `AITextWriter.Process` with arguments:
       - `--file` - path to working file
       - `--model` - model name (optional, if empty will be used default depending on LLM api, but if file name contains model name it will be used)
       - `--verbose` - show output (optional, default is `false`)
