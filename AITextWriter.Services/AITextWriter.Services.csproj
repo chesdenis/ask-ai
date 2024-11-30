@@ -6,4 +6,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\AITextWriter.Infrastructure\AITextWriter.Infrastructure.csproj" />
+      <ProjectReference Include="..\AITextWriter.Model\AITextWriter.Model.csproj" />
+    </ItemGroup>
+
 </Project>
