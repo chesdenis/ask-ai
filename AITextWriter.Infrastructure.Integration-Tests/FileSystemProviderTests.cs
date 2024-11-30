@@ -55,7 +55,7 @@ public class FileSystemProviderTests
         // Assert
         result.Should().Be("test");
     }
-    
+
     [Fact]
     public async Task WriteAllTextAsync_MustGetAllTextData()
     {
@@ -76,7 +76,7 @@ public class FileSystemProviderTests
         // Assert
         result.Should().Be("another-text");
     }
-    
+
     private ServiceProvider BuildServices(Func<ServiceCollection, ServiceCollection>? factory = null)
     {
         var serviceCollection = new ServiceCollection();

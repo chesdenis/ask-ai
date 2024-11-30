@@ -75,8 +75,8 @@ public class TextModelContextProviderTests
                     "testPath/apikey", // this is api key
                 });
             });
-        
-        fileSystemProvider.GetFilePathsAsync( "testPath", "apikey", false)
+
+        fileSystemProvider.GetFilePathsAsync("testPath", "apikey", false)
             .Returns(x => Task.FromResult(new[]
             {
                 "testPath/apikey", // this is api key
@@ -100,6 +100,80 @@ public class TextModelContextProviderTests
         // Assert
         await fileSystemProvider.Received(1).ReadAllTextAsync("testPath/apikey");
         apiKey.Should().Be("ABCDE");
+    }
+
+
+    [Theory]
+    [InlineData("### user\nHello\n### assistant\nHi\n### user\nHow are you?\n### assistant\nI am fine\n")]
+    [InlineData("### user   \nHello\n### assistant\nHi\n### user  \n\n\nHow are you?\n### assistant\nI am fine\n")]
+    [InlineData("### user   \nHello\n### assistant\nHi\n### user  \n\n\nHow are you?\n### assistant  \n\n\n\nI am fine\n")]
+    [InlineData("###user   \nHello\n###assistant\nHi\n###user  \n\n\nHow are you?\n###assistant  \n\n\n\nI am fine\n")]
+    public async Task GetPrompts_MustSupportDifferentKindOfInputCases(string inputText)
+    {
+        // Arrange
+        var fileSystemProvider = Substitute.For<IFileSystemProvider>();
+        fileSystemProvider.ReadAllTextAsync("testpath/testfile").Returns(Task.FromResult(inputText));
+        
+        var parametersProvider = Substitute.For<IParametersProvider>();
+        parametersProvider.GetWorkingFilePathAsync().Returns(Task.FromResult("testpath/testfile"));
+
+        // Act
+        var sut = BuildServices(x =>
+                {
+                    x.AddScoped<IFileSystemProvider, IFileSystemProvider>(x=>fileSystemProvider);
+                    x.AddScoped<IParametersProvider, IParametersProvider>(x=>parametersProvider);
+                    return x;
+                }
+            )
+            .GetService<ITextModelContextProvider>();
+
+        var prompts = await sut.GetPrompts();
+
+        // Assert
+        prompts.Should().NotBeEmpty();
+        prompts.Should().HaveCount(4);
+        prompts[0].role.Trim().Should().Be("user");
+        prompts[0].content.Trim().Should().Be("Hello");
+        
+        prompts[1].role.Trim().Should().Be("assistant");
+        prompts[1].content.Trim().Should().Be("Hi");
+        
+        prompts[2].role.Trim().Should().Be("user");
+        prompts[2].content.Trim().Should().Be("How are you?");
+        
+        prompts[3].role.Trim().Should().Be("assistant");
+        prompts[3].content.Trim().Should().Be("I am fine");
+    }
+    
+    [Theory]
+    [InlineData("This is an example \n of empty case")]
+    public async Task GetPrompts_MustSupportEmptyInputCase(string inputText)
+    {
+        // Arrange
+        var fileSystemProvider = Substitute.For<IFileSystemProvider>();
+        fileSystemProvider.ReadAllTextAsync("testpath/testfile").Returns(Task.FromResult(inputText));
+        
+        var parametersProvider = Substitute.For<IParametersProvider>();
+        parametersProvider.GetWorkingFilePathAsync().Returns(Task.FromResult("testpath/testfile"));
+
+        // Act
+        var sut = BuildServices(x =>
+                {
+                    x.AddScoped<IFileSystemProvider, IFileSystemProvider>(x=>fileSystemProvider);
+                    x.AddScoped<IParametersProvider, IParametersProvider>(x=>parametersProvider);
+                    return x;
+                }
+            )
+            .GetService<ITextModelContextProvider>();
+
+        var prompts = await sut.GetPrompts();
+
+        // Assert
+        prompts.Should().NotBeEmpty();
+        prompts.Should().HaveCount(1);
+        
+        prompts[0].role.Trim().Should().Be("user");
+        prompts[0].content.Trim().Should().Be("This is an example \n of empty case");
     }
 
     private ServiceProvider BuildServices(Func<ServiceCollection, ServiceCollection>? factory = null)

@@ -1,4 +1,6 @@
+using System.Text.RegularExpressions;
 using AITextWriter.Infrastructure.Abstractions;
+using AITextWriter.Model;
 
 namespace AITextWriter.Infrastructure;
 
@@ -7,6 +9,10 @@ public class TextModelContextProvider(
     IParametersProvider parametersProvider) : ITextModelContextProvider
 {
     private const string ApiKeyFileName = "apikey";
+    
+    // Regular expression to match sections starting with ### followed by role and the text
+    private const string PromptRolesSectionsPattern =   @"### (user|assistant)\n([\s\S]*?)(?=(### (user|assistant)|$))";
+    private const string PromptRolesSectionsPatternV2 = @"###\s*(user|assistant)\s*\n([\s\S]*?)(?=(###\s*(user|assistant)|$))";
 
     public async Task<string[]> GetTagsAsync()
     {
@@ -56,5 +62,40 @@ public class TextModelContextProvider(
         }
 
         return apiKey;
+    }
+
+    public async Task<Prompt[]> GetPrompts()
+    {
+        var workingFile = await parametersProvider.GetWorkingFilePathAsync();
+        var contents = await fileSystemProvider.ReadAllTextAsync(workingFile);
+
+        // case when there is no role specified
+        if (!contents.Trim().StartsWith("###"))
+        {
+            return
+            [
+                new Prompt
+                {
+                    role = "user",
+                    content = contents
+                }
+            ];
+        }
+        
+        // List to hold the extracted roles and text
+        List<(string Role, string Text)> extractedTexts = new();
+
+        foreach (Match match in Regex.Matches(contents, PromptRolesSectionsPatternV2, RegexOptions.IgnoreCase))
+        {
+            var role = match.Groups[1].Value.Trim();
+            var text = match.Groups[2].Value.Trim();
+            extractedTexts.Add((role, text));
+        }
+
+        return extractedTexts.Select(s => new Prompt
+        {
+            role = s.Role,
+            content = s.Text
+        }).ToArray();
     }
 }

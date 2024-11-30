@@ -8,4 +8,9 @@ public class Prompt
     public string role { get; set; }
 
     public string content { get; set; }
+
+    public override string ToString()
+    {
+        return $"{nameof(role)}: {role}, {nameof(content)}: {content}";
+    }
 }

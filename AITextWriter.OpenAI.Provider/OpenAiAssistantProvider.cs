@@ -4,6 +4,7 @@ using AITextWriter.Infrastructure.Abstractions;
 using AITextWriter.Model;
 using AITextWriter.OpenAI.Provider.Request;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace AITextWriter.OpenAI.Provider;
 
@@ -39,11 +40,14 @@ public class OpenAiAssistantProvider(
 
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadAsStringAsync();
+        var resultAsString = await response.Content.ReadAsStringAsync();
 
-        logger.LogDebug("OpenAI API request succeeded");
-        logger.LogDebug("Received response with size: {resultLength}", result.Length);
+        logger.LogDebug("Received response with size: {resultLength}", resultAsString.Length);
 
-        return result;
+        var result = JsonConvert.DeserializeObject<ChatCompletionResponse>(resultAsString);
+
+        var message = result?.Choices.FirstOrDefault()?.Message;
+        
+        return message?.Content!;
     }
 }
