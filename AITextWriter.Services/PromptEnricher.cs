@@ -5,7 +5,7 @@ using AITextWriter.Services.Abstractions;
 
 namespace AITextWriter.Services;
 
-public class PromptEnricher(ITextModelContextProvider textModelContextProvider) : IPromptEnricher
+public class PromptEnricher(IUserPromptReader userPromptReader) : IPromptEnricher
 {
     public async Task<Prompt[]> EnrichAsync(Prompt[] input)
     {
@@ -17,7 +17,7 @@ public class PromptEnricher(ITextModelContextProvider textModelContextProvider) 
     private async Task<Prompt[]> UpdateTags(Prompt[] input)
     {
         var firstPrompt = input.First();
-        var tags = await textModelContextProvider.GetTagsAsync();
+        var tags = await userPromptReader.GetTagsAsync();
         if (tags.Length == 0)
         {
             return input;

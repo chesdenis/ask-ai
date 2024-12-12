@@ -25,6 +25,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\AITextWriter.Infrastructure\AITextWriter.Infrastructure.csproj" />
+      <ProjectReference Include="..\AITextWriter.Services\AITextWriter.Services.csproj" />
     </ItemGroup>
 
 </Project>

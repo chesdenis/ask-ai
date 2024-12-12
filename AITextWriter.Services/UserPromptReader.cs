@@ -1,18 +1,16 @@
 using System.Text.RegularExpressions;
 using AITextWriter.Infrastructure.Abstractions;
 using AITextWriter.Model;
+using AITextWriter.Services.Abstractions;
 
-namespace AITextWriter.Infrastructure;
+namespace AITextWriter.Services;
 
-public class TextModelContextProvider(
+public class UserPromptReader(
     IFileSystemProvider fileSystemProvider,
-    IParametersProvider parametersProvider) : ITextModelContextProvider
+    IParametersProvider parametersProvider) : IUserPromptReader
 {
     private const string ApiKeyFileName = "apikey";
-    
-    // Regular expression to match sections starting with ### followed by role and the text
-    private const string PromptRolesSectionsPattern =   @"### (user|assistant)\n([\s\S]*?)(?=(### (user|assistant)|$))";
-    private const string PromptRolesSectionsPatternV2 = @"###\s*(user|assistant)\s*\n([\s\S]*?)(?=(###\s*(user|assistant)|$))";
+    private const string PromptSelectPattern = @"\n{3,}";
 
     public async Task<string[]> GetTagsAsync()
     {
@@ -23,9 +21,9 @@ public class TextModelContextProvider(
 
         var tags = files.Select(Path.GetFileNameWithoutExtension).ToList();
 
-        var workingFilePathAsync = await parametersProvider.GetWorkingFilePathAsync();
+        var workingFilePath = await parametersProvider.GetWorkingFilePathAsync();
 
-        tags.Remove(Path.GetFileNameWithoutExtension(workingFilePathAsync)); // this is context file
+        tags.Remove(Path.GetFileNameWithoutExtension(workingFilePath)); // this is context file
 
         // these are generator file if available (on MacOs/Linux can be)
         tags.Remove("AITextWriterListen");
@@ -36,7 +34,7 @@ public class TextModelContextProvider(
         return tags.ToArray()!;
     }
 
-    public async Task<string> GetApiKey()
+    public async Task<string> GetApiKeyAsync()
     {
         var workingFolder = await parametersProvider.GetWorkingFolderPathAsync();
 
@@ -64,31 +62,25 @@ public class TextModelContextProvider(
         return apiKey;
     }
 
-    public async Task<Prompt[]> GetPrompts()
+    public async Task<Prompt[]> GetPromptsAsync()
     {
         var workingFile = await parametersProvider.GetWorkingFilePathAsync();
         var contents = await fileSystemProvider.ReadAllTextAsync(workingFile);
 
-        // case when there is no role specified
-        if (!contents.Trim().StartsWith("###"))
-        {
-            return
-            [
-                new Prompt
-                {
-                    role = "user",
-                    content = contents
-                }
-            ];
-        }
+        var contentParts = Regex.Split(contents, PromptSelectPattern);
         
         // List to hold the extracted roles and text
         List<(string Role, string Text)> extractedTexts = new();
 
-        foreach (Match match in Regex.Matches(contents, PromptRolesSectionsPatternV2, RegexOptions.IgnoreCase))
+        foreach (var part in contentParts)
         {
-            var role = match.Groups[1].Value.Trim();
-            var text = match.Groups[2].Value.Trim();
+            if (string.IsNullOrWhiteSpace(part))
+            {
+                continue;
+            }
+            
+            var role = "user";
+            var text = part;
             extractedTexts.Add((role, text));
         }
 

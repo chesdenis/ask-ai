@@ -13,14 +13,14 @@ public class PromptEnricherTests
     public async Task EnrichAsync_MustProduceCorrectResults()
     {
         // Arrange
-        var textModelContextProvider = Substitute.For<ITextModelContextProvider>();
+        var textModelContextProvider = Substitute.For<IUserPromptReader>();
         textModelContextProvider.GetTagsAsync().Returns(Task.FromResult(new[]
             { "c#", "cloud", "story" }));
 
         // Act
         var sut = BuildServices(x =>
                 {
-                    x.AddScoped<ITextModelContextProvider, ITextModelContextProvider>(
+                    x.AddScoped<IUserPromptReader, IUserPromptReader>(
                         x => textModelContextProvider);
                     return x;
                 }
@@ -35,8 +35,8 @@ public class PromptEnricherTests
             },
             new Prompt()
             {
-                role = "assistant",
-                content = "Some response"
+                role = "user",
+                content = "Some additional response"
             }
         ]);
 

@@ -2,7 +2,7 @@ using AITextWriter.Model;
 
 namespace AITextWriter.Infrastructure.Abstractions;
 
-public interface IAssistantAnswerProvider
+public interface IAssistantResponseProvider
 {
     Task<string> GetAssistantAnswer(
         Prompt[] prompts,

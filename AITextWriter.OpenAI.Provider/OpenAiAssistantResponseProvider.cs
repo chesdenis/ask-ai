@@ -8,9 +8,9 @@ using Newtonsoft.Json;
 
 namespace AITextWriter.OpenAI.Provider;
 
-public class OpenAiAssistantProvider(
+public class OpenAiAssistantResponseProvider(
     HttpClient httpClient,
-    ILogger<OpenAiAssistantProvider> logger) : IAssistantAnswerProvider
+    ILogger<OpenAiAssistantResponseProvider> logger) : IAssistantResponseProvider
 {
     public async Task<string> GetAssistantAnswer(
         Prompt[] prompts, ModelDetails modelDetails,

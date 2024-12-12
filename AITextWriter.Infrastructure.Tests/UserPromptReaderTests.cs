@@ -1,11 +1,13 @@
 using AITextWriter.Infrastructure.Abstractions;
+using AITextWriter.Services;
+using AITextWriter.Services.Abstractions;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 
 namespace AITextWriter.Infrastructure.Tests;
 
-public class TextModelContextProviderTests
+public class UserPromptReaderTests
 {
     [Fact]
     public async Task GetTagsAsync_MustReturnCorrectTags()
@@ -40,7 +42,7 @@ public class TextModelContextProviderTests
                     return x;
                 }
             )
-            .GetService<ITextModelContextProvider>();
+            .GetService<IUserPromptReader>();
 
         var tags = await sut.GetTagsAsync();
 
@@ -53,7 +55,7 @@ public class TextModelContextProviderTests
     }
 
     [Fact]
-    public async Task GetApiKey_ShouldReturnApiKeyContent()
+    public async Task GetApiKey_MustReturnApiKeyContent()
     {
         var parametersProvider = Substitute.For<IParametersProvider>();
         parametersProvider.GetWorkingFolderPathAsync().Returns(x => Task.FromResult("testPath"));
@@ -93,9 +95,9 @@ public class TextModelContextProviderTests
                     return x;
                 }
             )
-            .GetService<ITextModelContextProvider>();
+            .GetService<IUserPromptReader>();
 
-        var apiKey = await sut.GetApiKey();
+        var apiKey = await sut.GetApiKeyAsync();
 
         // Assert
         await fileSystemProvider.Received(1).ReadAllTextAsync("testPath/apikey");
@@ -104,11 +106,16 @@ public class TextModelContextProviderTests
 
 
     [Theory]
-    [InlineData("### user\nHello\n### assistant\nHi\n### user\nHow are you?\n### assistant\nI am fine\n")]
-    [InlineData("### user   \nHello\n### assistant\nHi\n### user  \n\n\nHow are you?\n### assistant\nI am fine\n")]
-    [InlineData("### user   \nHello\n### assistant\nHi\n### user  \n\n\nHow are you?\n### assistant  \n\n\n\nI am fine\n")]
-    [InlineData("###user   \nHello\n###assistant\nHi\n###user  \n\n\nHow are you?\n###assistant  \n\n\n\nI am fine\n")]
-    public async Task GetPrompts_MustSupportDifferentKindOfInputCases(string inputText)
+    [InlineData("Hello! How are you?", 1)]
+    [InlineData("Hello! How are you?\n\nPlease tell me something", 1)]
+    [InlineData("Hello! How are you?\n\n\nPlease tell me something\nhere is some test data", 2)]
+    [InlineData("Hello! How are you?\n\n\nPlease tell me something\n\n\nhere is some test data", 3)]
+    [InlineData("Hello! How are you?\n\n\n\n\nPlease tell me something\n\n\nhere is some test data", 3)]
+    [InlineData("AA\nBB\n\nCC", 1)]
+    [InlineData("", 0)]
+    [InlineData("FF", 1)]
+    [InlineData("ABCDE\n ABCDE", 1)]
+    public async Task GetPromptsAsync_MustSupportSetOfInputCases(string inputText, int expectedPromptCount)
     {
         // Arrange
         var fileSystemProvider = Substitute.For<IFileSystemProvider>();
@@ -125,24 +132,12 @@ public class TextModelContextProviderTests
                     return x;
                 }
             )
-            .GetService<ITextModelContextProvider>();
+            .GetService<IUserPromptReader>();
 
-        var prompts = await sut.GetPrompts();
+        var prompts = await sut.GetPromptsAsync();
 
         // Assert
-        prompts.Should().NotBeEmpty();
-        prompts.Should().HaveCount(4);
-        prompts[0].role.Trim().Should().Be("user");
-        prompts[0].content.Trim().Should().Be("Hello");
-        
-        prompts[1].role.Trim().Should().Be("assistant");
-        prompts[1].content.Trim().Should().Be("Hi");
-        
-        prompts[2].role.Trim().Should().Be("user");
-        prompts[2].content.Trim().Should().Be("How are you?");
-        
-        prompts[3].role.Trim().Should().Be("assistant");
-        prompts[3].content.Trim().Should().Be("I am fine");
+        prompts.Should().HaveCount(expectedPromptCount);
     }
     
     [Theory]
@@ -164,9 +159,9 @@ public class TextModelContextProviderTests
                     return x;
                 }
             )
-            .GetService<ITextModelContextProvider>();
+            .GetService<IUserPromptReader>();
 
-        var prompts = await sut.GetPrompts();
+        var prompts = await sut.GetPromptsAsync();
 
         // Assert
         prompts.Should().NotBeEmpty();
@@ -179,7 +174,7 @@ public class TextModelContextProviderTests
     private ServiceProvider BuildServices(Func<ServiceCollection, ServiceCollection>? factory = null)
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddScoped<ITextModelContextProvider, TextModelContextProvider>();
+        serviceCollection.AddScoped<IUserPromptReader, UserPromptReader>();
         serviceCollection.AddLogging();
         serviceCollection = factory?.Invoke(serviceCollection) ?? serviceCollection;
         return serviceCollection.BuildServiceProvider();

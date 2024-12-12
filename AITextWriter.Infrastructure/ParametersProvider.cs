@@ -3,19 +3,9 @@ using AITextWriter.Infrastructure.Options;
 
 namespace AITextWriter.Infrastructure;
 
-public class ParametersProvider : IParametersProvider
+public class ParametersProvider(IListenContextOptions options)
+    : IParametersProvider
 {
-    private readonly IListenContextOptions _options;
-
-    public ParametersProvider(IListenContextOptions options)
-    {
-        _options = options;
-    }
-
-    public ParametersProvider()
-    {
-        
-    }
     public Task<string> GetWorkingFolderPathAsync()
     {
         throw new NotImplementedException();

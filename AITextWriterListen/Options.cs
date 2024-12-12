@@ -1,6 +1,8 @@
 using AITextWriter.Infrastructure.Options;
 using CommandLine;
 
+namespace AITextWriterListen;
+
 public class Options : IListenContextOptions
 {
     [Option('w', "working-folder", Required = true, HelpText = "Path to working folder.")]
