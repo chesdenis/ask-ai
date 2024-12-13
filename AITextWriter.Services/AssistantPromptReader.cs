@@ -7,17 +7,20 @@ using AITextWriter.Services.Extensions;
 namespace AITextWriter.Services;
 
 public class AssistantPromptReader(
-        IFileSystemProvider fileSystemProvider,
-        IParametersProvider parametersProvider
+        IFileSystemProvider fileSystemProvider
         ): IAssistantPromptReader
 {
     // Regular expression to match sections starting with ### followed by role and the text
     private const string PromptSelectPattern = @"###\s*(user|assistant)\s*\n([\s\S]*?)(?=(###\s*(user|assistant)|$))";
 
-    public async Task<Prompt[]> GetPromptsAsync()
+    public async Task<Prompt[]> GetPromptsAsync(string filePath)
     { 
-        var workingFile = await parametersProvider.GetWorkingFilePathAsync();
-        var answerFile = await workingFile.GetAnswerFilePathAsync();
+        var answerFile = await filePath.GetAnswerFilePathAsync();
+
+        if (fileSystemProvider.FileExist(answerFile))
+        {
+            return [];
+        }
 
         var contents = await fileSystemProvider.ReadAllTextAsync(answerFile);
         

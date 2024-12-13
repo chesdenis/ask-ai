@@ -4,5 +4,5 @@ namespace AITextWriter.Services.Abstractions;
 
 public interface IPromptEnricher
 {
-    Task<Prompt[]> EnrichAsync(Prompt[] input);
+    Task<Prompt[]> EnrichAsync(Prompt[] input, string filePath);
 }

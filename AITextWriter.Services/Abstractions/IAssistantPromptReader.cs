@@ -4,5 +4,5 @@ namespace AITextWriter.Services.Abstractions;
 
 public interface IAssistantPromptReader
 {
-    Task<Prompt[]> GetPromptsAsync();
+    Task<Prompt[]> GetPromptsAsync(string filePath);
 }

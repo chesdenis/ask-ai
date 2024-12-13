@@ -14,7 +14,7 @@ public class PromptEnricherTests
     {
         // Arrange
         var textModelContextProvider = Substitute.For<IUserPromptReader>();
-        textModelContextProvider.GetTagsAsync().Returns(Task.FromResult(new[]
+        textModelContextProvider.GetTagsAsync("test-file.md").Returns(Task.FromResult(new[]
             { "c#", "cloud", "story" }));
 
         // Act
@@ -38,7 +38,7 @@ public class PromptEnricherTests
                 role = "user",
                 content = "Some additional response"
             }
-        ]);
+        ], "test-file.md");
 
         // Assert
         result.Should().HaveCount(2);

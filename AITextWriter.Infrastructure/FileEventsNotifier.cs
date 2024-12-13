@@ -2,13 +2,19 @@ using AITextWriter.Infrastructure.Abstractions;
 
 namespace AITextWriter.Infrastructure;
 
-public class FileSystemNotifier : IFileSystemNotifier
+public class FileEventsNotifier : IFileEventsNotifier
 {
     private FileSystemWatcher _fileSystemWatcher;
 
     public event EventHandler<FileSystemEventArgs> FileChanged;
 
-    public void Start(string path, string filter, bool recursive)
+    /// <summary>
+    /// Start listen of all updates in folder.
+    /// </summary>
+    /// <param name="path">directory to monitor</param>
+    /// <param name="filter">filter for files to listen</param>
+    /// <param name="recursive">recursive listen</param>
+    public void Start(string path, string filter = "*.*", bool recursive = true)
     {
         _fileSystemWatcher = new FileSystemWatcher(path, filter)
         {

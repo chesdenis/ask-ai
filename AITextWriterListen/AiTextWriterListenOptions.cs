@@ -3,7 +3,7 @@ using CommandLine;
 
 namespace AITextWriterListen;
 
-public class Options : IListenContextOptions
+public class AiTextWriterListenOptions : IListenContextOptions
 {
     [Option('w', "working-folder", Required = true, HelpText = "Path to working folder.")]
     public string WorkingFolder { get; set; }

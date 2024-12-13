@@ -7,17 +7,17 @@ namespace AITextWriter.Services;
 
 public class PromptEnricher(IUserPromptReader userPromptReader) : IPromptEnricher
 {
-    public async Task<Prompt[]> EnrichAsync(Prompt[] input)
+    public async Task<Prompt[]> EnrichAsync(Prompt[] input, string filePath)
     {
-        var result = await UpdateTags(input);
+        var result = await UpdateTags(input, filePath);
 
         return result;
     }
 
-    private async Task<Prompt[]> UpdateTags(Prompt[] input)
+    private async Task<Prompt[]> UpdateTags(Prompt[] input, string filePath)
     {
         var firstPrompt = input.First();
-        var tags = await userPromptReader.GetTagsAsync();
+        var tags = await userPromptReader.GetTagsAsync(filePath);
         if (tags.Length == 0)
         {
             return input;

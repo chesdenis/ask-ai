@@ -1,7 +1,6 @@
 namespace AITextWriter.Infrastructure.Abstractions;
 
-public interface IParametersProvider
+public interface IFileSystemContextParameters
 {
     Task<string> GetWorkingFolderPathAsync();
-    Task<string> GetWorkingFilePathAsync();
 }

@@ -74,4 +74,17 @@ public class FileSystemProvider(ILogger<FileSystemProvider> logger) : IFileSyste
             throw;
         }
     }
+
+    public bool FileExist(string filePath)
+    {
+        try
+        {
+            return File.Exists(filePath);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error checking if file exists {FilePath}", filePath);
+            throw;
+        }
+    }
 }

@@ -4,7 +4,7 @@ namespace AITextWriter.Services.Abstractions;
 
 public interface IUserPromptReader
 {
-    Task<string[]> GetTagsAsync();
+    Task<string[]> GetTagsAsync(string filePath);
     Task<string> GetApiKeyAsync();
-    Task<Prompt[]> GetPromptsAsync();
+    Task<Prompt[]> GetPromptsAsync(string filePath);
 }

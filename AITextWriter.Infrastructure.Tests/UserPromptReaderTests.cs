@@ -13,7 +13,7 @@ public class UserPromptReaderTests
     public async Task GetTagsAsync_MustReturnCorrectTags()
     {
         // Arrange
-        var parametersProvider = Substitute.For<IParametersProvider>();
+        var parametersProvider = Substitute.For<IFileSystemContextParameters>();
         parametersProvider.GetWorkingFolderPathAsync().Returns(x => Task.FromResult("testPath"));
 
         var fileSystemProvider = Substitute.For<IFileSystemProvider>();
@@ -38,13 +38,13 @@ public class UserPromptReaderTests
         var sut = BuildServices(x =>
                 {
                     x.AddScoped<IFileSystemProvider, IFileSystemProvider>(_ => fileSystemProvider);
-                    x.AddScoped<IParametersProvider, IParametersProvider>(_ => parametersProvider);
+                    x.AddScoped<IFileSystemContextParameters, IFileSystemContextParameters>(_ => parametersProvider);
                     return x;
                 }
             )
             .GetService<IUserPromptReader>();
 
-        var tags = await sut.GetTagsAsync();
+        var tags = await sut.GetTagsAsync("sample-file");
 
         // Assert
         await fileSystemProvider.Received(1).GetFilePathsAsync("testPath", "*.", false);
@@ -57,7 +57,7 @@ public class UserPromptReaderTests
     [Fact]
     public async Task GetApiKey_MustReturnApiKeyContent()
     {
-        var parametersProvider = Substitute.For<IParametersProvider>();
+        var parametersProvider = Substitute.For<IFileSystemContextParameters>();
         parametersProvider.GetWorkingFolderPathAsync().Returns(x => Task.FromResult("testPath"));
 
         var fileSystemProvider = Substitute.For<IFileSystemProvider>();
@@ -91,7 +91,7 @@ public class UserPromptReaderTests
         var sut = BuildServices(x =>
                 {
                     x.AddScoped<IFileSystemProvider, IFileSystemProvider>(_ => fileSystemProvider);
-                    x.AddScoped<IParametersProvider, IParametersProvider>(_ => parametersProvider);
+                    x.AddScoped<IFileSystemContextParameters, IFileSystemContextParameters>(_ => parametersProvider);
                     return x;
                 }
             )
@@ -121,20 +121,19 @@ public class UserPromptReaderTests
         var fileSystemProvider = Substitute.For<IFileSystemProvider>();
         fileSystemProvider.ReadAllTextAsync("testpath/testfile").Returns(Task.FromResult(inputText));
         
-        var parametersProvider = Substitute.For<IParametersProvider>();
-        parametersProvider.GetWorkingFilePathAsync().Returns(Task.FromResult("testpath/testfile"));
+        var parametersProvider = Substitute.For<IFileSystemContextParameters>();
 
         // Act
         var sut = BuildServices(x =>
                 {
                     x.AddScoped<IFileSystemProvider, IFileSystemProvider>(x=>fileSystemProvider);
-                    x.AddScoped<IParametersProvider, IParametersProvider>(x=>parametersProvider);
+                    x.AddScoped<IFileSystemContextParameters, IFileSystemContextParameters>(x=>parametersProvider);
                     return x;
                 }
             )
             .GetService<IUserPromptReader>();
 
-        var prompts = await sut.GetPromptsAsync();
+        var prompts = await sut.GetPromptsAsync("testpath/testfile");
 
         // Assert
         prompts.Should().HaveCount(expectedPromptCount);
@@ -148,20 +147,19 @@ public class UserPromptReaderTests
         var fileSystemProvider = Substitute.For<IFileSystemProvider>();
         fileSystemProvider.ReadAllTextAsync("testpath/testfile").Returns(Task.FromResult(inputText));
         
-        var parametersProvider = Substitute.For<IParametersProvider>();
-        parametersProvider.GetWorkingFilePathAsync().Returns(Task.FromResult("testpath/testfile"));
+        var parametersProvider = Substitute.For<IFileSystemContextParameters>();
 
         // Act
         var sut = BuildServices(x =>
                 {
                     x.AddScoped<IFileSystemProvider, IFileSystemProvider>(x=>fileSystemProvider);
-                    x.AddScoped<IParametersProvider, IParametersProvider>(x=>parametersProvider);
+                    x.AddScoped<IFileSystemContextParameters, IFileSystemContextParameters>(x=>parametersProvider);
                     return x;
                 }
             )
             .GetService<IUserPromptReader>();
 
-        var prompts = await sut.GetPromptsAsync();
+        var prompts = await sut.GetPromptsAsync("testpath/testfile");
 
         // Assert
         prompts.Should().NotBeEmpty();

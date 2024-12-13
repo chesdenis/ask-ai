@@ -7,23 +7,22 @@ namespace AITextWriter.Services;
 
 public class UserPromptReader(
     IFileSystemProvider fileSystemProvider,
-    IParametersProvider parametersProvider) : IUserPromptReader
+    IFileSystemContextParameters fileSystemContextParameters) : IUserPromptReader
 {
     private const string ApiKeyFileName = "apikey";
     private const string PromptSelectPattern = @"\n{3,}";
 
-    public async Task<string[]> GetTagsAsync()
+    public async Task<string[]> GetTagsAsync(string filePath)
     {
-        var workingPath = await parametersProvider.GetWorkingFolderPathAsync();
+        var workingPath = await fileSystemContextParameters.GetWorkingFolderPathAsync();
         var files = await fileSystemProvider.GetFilePathsAsync(
             workingPath,
             "*.", false);
 
         var tags = files.Select(Path.GetFileNameWithoutExtension).ToList();
-
-        var workingFilePath = await parametersProvider.GetWorkingFilePathAsync();
-
-        tags.Remove(Path.GetFileNameWithoutExtension(workingFilePath)); // this is context file
+        
+        // this is target file, and we need to exclude it from tags
+        tags.Remove(Path.GetFileNameWithoutExtension(filePath)); 
 
         // these are generator file if available (on MacOs/Linux can be)
         tags.Remove("AITextWriterListen");
@@ -36,7 +35,7 @@ public class UserPromptReader(
 
     public async Task<string> GetApiKeyAsync()
     {
-        var workingFolder = await parametersProvider.GetWorkingFolderPathAsync();
+        var workingFolder = await fileSystemContextParameters.GetWorkingFolderPathAsync();
 
         var apiKeyPathSearchResults = await fileSystemProvider.GetFilePathsAsync(
             workingFolder,
@@ -62,10 +61,9 @@ public class UserPromptReader(
         return apiKey;
     }
 
-    public async Task<Prompt[]> GetPromptsAsync()
+    public async Task<Prompt[]> GetPromptsAsync(string filePath)
     {
-        var workingFile = await parametersProvider.GetWorkingFilePathAsync();
-        var contents = await fileSystemProvider.ReadAllTextAsync(workingFile);
+        var contents = await fileSystemProvider.ReadAllTextAsync(filePath);
 
         var contentParts = Regex.Split(contents, PromptSelectPattern);
         
