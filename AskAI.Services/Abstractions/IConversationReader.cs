@@ -4,5 +4,5 @@ namespace AskAI.Services.Abstractions;
 
 public interface IConversationReader
 {
-    IAsyncEnumerable<ConversationPair> EnumerateAsync(string filePath);
+    IAsyncEnumerable<ConversationPair> EnumerateConversationPairsAsync(string questionFilePath);
 }

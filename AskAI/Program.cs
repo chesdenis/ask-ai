@@ -40,6 +40,12 @@ internal class Program
                 await serviceProvider.GetRequiredService<AskAiConsoleMode>().RunAsync(ct);
             }
 
+            if (args.Length == 1)
+            {
+                // run app with question document
+                await serviceProvider.GetRequiredService<AskAiDocumentMode>().RunAsync(args[0], ct);
+            }
+
             // Parser.Default.ParseArguments<ListenOptions>(args).WithParsed(RunOptionsAndReturnExitCode)
             //     .WithNotParsed(HandleParseError);
 
@@ -63,31 +69,10 @@ internal class Program
     {
         services
             .RegisterLogging()
-            .AddAppsComponents()
-            .AddScoped<IAssistantResponseProvider, OpenAiAssistantResponseProvider>()
-            .AddHttpClient();
+            .AddAppsComponents();
     }
 }
 
-// using System.Text;
-// using AskAI.Infrastructure.Abstractions;
-// using AskAI.Infrastructure.Options;
-// using AskAI.Model;
-// using AskAI.OpenAI.Provider;
-// using AskAI.Services;
-// using AskAI.Services.Abstractions;
-// using CommandLine;
-// using Microsoft.Extensions.DependencyInjection;
-// using Microsoft.Extensions.Logging;
-// using Serilog;
-// using AskAI.Services.DI;
-// using AskAI.Services.Extensions;
-//
-// namespace AITextWriterListen;
-//
-// internal class Program
-// {
-//
 //     static void RunOptionsAndReturnExitCode(ListenOptions opts)
 //     {
 //         if (opts.Help)

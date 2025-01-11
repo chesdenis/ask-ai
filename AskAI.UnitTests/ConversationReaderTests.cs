@@ -8,6 +8,7 @@ using AskAI.Services.Abstractions;
 
 namespace AskAI.UnitTests;
 
+
 public class ConversationReaderTests
 {
     [Fact]
@@ -26,7 +27,7 @@ public class ConversationReaderTests
             .GetService<IConversationReader>();
 
         // Act
-        var result = sut.EnumerateAsync("test.txt");
+        var result = sut.EnumerateConversationPairsAsync("test.txt");
         var items = new List<ConversationPair>();
         await foreach (var item in result)
         {
@@ -54,7 +55,7 @@ public class ConversationReaderTests
             .GetService<IConversationReader>();
 
         // Act
-        var result = sut.EnumerateAsync("test.txt");
+        var result = sut.EnumerateConversationPairsAsync("test.txt");
         var items = new List<ConversationPair>();
         await foreach (var item in result)
         {
@@ -84,7 +85,7 @@ public class ConversationReaderTests
             .GetService<IConversationReader>();
 
         // Act
-        var result = sut.EnumerateAsync("test.txt");
+        var result = sut.EnumerateConversationPairsAsync("test.txt");
         var items = new List<ConversationPair>();
         await foreach (var item in result)
         {

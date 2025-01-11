@@ -10,6 +10,14 @@ public class AskAiConsoleMode(IAssistantResponseProvider assistantResponseProvid
     public async Task RunAsync(CancellationToken ct)
     {
         var baseDir = AppContext.BaseDirectory;
+        
+        var apiRequestSettings = new ApiRequestSettings
+        {
+            ApiKey = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.ApiKey),
+            Model = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.Model),
+            Endpoint = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.Endpoint),
+            TimeoutMinutes = ContextExtensions.ResolveRequiredKey<int>(baseDir, ReservedKeywords.TimeoutMinutes),
+        };
 
         Console.WriteLine("Hello! Console mode is running. Base directory: {0}", baseDir);
         Console.WriteLine("What would you like to ask?");
@@ -24,14 +32,7 @@ public class AskAiConsoleMode(IAssistantResponseProvider assistantResponseProvid
             }
             
             var questionText = Console.ReadLine();
-            var apiRequestSettings = new ApiRequestSettings
-            {
-                ApiKey = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.ApiKey),
-                Model = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.Model),
-                Endpoint = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.Endpoint),
-                TimeoutMinutes = ContextExtensions.ResolveRequiredKey<int>(baseDir, ReservedKeywords.TimeoutMinutes),
-            };
-
+            
             if (string.IsNullOrWhiteSpace(questionText))
             {
                 continue;

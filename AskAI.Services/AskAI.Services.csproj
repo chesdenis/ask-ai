@@ -14,6 +14,8 @@
         <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0"/>
         <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
+        <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+        <ProjectReference Include="..\AskAI.OpenAI.Provider\AskAI.OpenAI.Provider.csproj" />
     </ItemGroup>
 
 </Project>

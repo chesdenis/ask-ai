@@ -1,6 +1,7 @@
 using AskAI.Infrastructure.Abstractions;
 using AskAI.RunOptions;
 using AskAI.Services.Abstractions;
+using AskAI.Services.Apps;
 using AskAI.Services.DI;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,12 +26,23 @@ public class DiContainersTests
         
         var serviceProvider = services.BuildServiceProvider();
         
-        var fileEventsNotifier = serviceProvider.GetRequiredService<IFileWatcher>();
-        var userPromptReader = serviceProvider.GetRequiredService<IQuestionsReader>();
-        var assistancePromptReader = serviceProvider.GetRequiredService<IConversationReader>();
-        var askPromptGenerator = serviceProvider.GetRequiredService<IAskPromptGenerator>();
-        var promptEnricher = serviceProvider.GetRequiredService<IPromptEnricher>();
+        serviceProvider.GetRequiredService<IAskPromptGenerator>();
+        serviceProvider.GetRequiredService<IAssistantAnswersWriter>();
+        serviceProvider.GetRequiredService<IConversationReader>();
+        serviceProvider.GetRequiredService<IPromptEnricher>();
+        serviceProvider.GetRequiredService<IQuestionsReader>();
         
+        serviceProvider.GetRequiredService<IFileWatcher>();
+        serviceProvider.GetRequiredService<IAssistantResponseProvider>();
+        serviceProvider.GetRequiredService<IFileSystemProvider>();
+        serviceProvider.GetRequiredService<IWorkSpaceContext>();
+      
+        serviceProvider.GetRequiredService<IConversationReader>();
+        serviceProvider.GetRequiredService<IQuestionsReader>();
+        
+        serviceProvider.GetRequiredService<AskAiConsoleMode>();
+        serviceProvider.GetRequiredService<AskAiDocumentMode>();
+
         // Assert
     }
 }

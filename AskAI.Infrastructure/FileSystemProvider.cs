@@ -22,6 +22,57 @@ public class FileSystemProvider(ILogger<FileSystemProvider> logger) : IFileSyste
             throw;
         }
     }
+    
+    public IEnumerable<string> EnumerateFiles(IEnumerable<string> linksOfFilesOrDirs)
+    {
+        foreach (var p in linksOfFilesOrDirs)
+        {
+            var isDirectory = Directory.Exists(p);
+
+            if (isDirectory)
+            {
+                var files = Directory.EnumerateFiles(p, "*", 
+                    SearchOption.AllDirectories).ToArray();
+
+                foreach (var f in files)
+                {
+                    yield return f;
+                }
+               
+                continue;
+            }
+            
+            yield return p;
+        }
+    }
+    
+    public string CalculateBaseDirectory(IEnumerable<string> paths)
+    {
+        if (!paths.Any())
+            return string.Empty;
+
+        var separatedPaths = paths
+            .Select(path => path.Split(Path.DirectorySeparatorChar))
+            .ToList();
+
+        var commonPath = separatedPaths
+            .First()
+            .TakeWhile((part, index) => separatedPaths.All(p => p.Length > index && p[index] == part))
+            .ToArray();
+        
+        commonPath = commonPath.Take(commonPath.Length - 1).ToArray();
+
+        for (var i = 0; i < commonPath.Length; i++)
+        {
+            var p = commonPath[i];
+            if (string.IsNullOrWhiteSpace(p))
+            {
+                commonPath[i] = Path.DirectorySeparatorChar.ToString();
+            }
+        }
+
+        return Path.Combine(commonPath);
+    }
 
     public async Task WriteAllTextAsync(string path, string content)
     {

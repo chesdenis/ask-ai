@@ -13,9 +13,9 @@ public class ConversationReader(
     // Regular expression to match sections starting with ### followed by role and the text
     private const string PromptSelectPattern = @"###\s*(user|assistant)\s*\n([\s\S]*?)(?=(###\s*(user|assistant)|$))";
 
-    public async IAsyncEnumerable<ConversationPair> EnumerateAsync(string filePath)
+    public async IAsyncEnumerable<ConversationPair> EnumerateConversationPairsAsync(string questionFilePath)
     {
-        var answerFile = await filePath.GetAnswerFilePathAsync();
+        var answerFile = await questionFilePath.GetConversationFilePathAsync();
 
         if (!fileSystemProvider.FileExist(answerFile))
         {
@@ -36,7 +36,7 @@ public class ConversationReader(
                     content = contents
                 }
             };
-            
+
             yield break;
         }
 
@@ -50,18 +50,18 @@ public class ConversationReader(
             extractedTexts.Add((role, text));
         }
 
-        for (int i = 0; i < extractedTexts.Count; i+=2)
+        for (int i = 0; i < extractedTexts.Count; i += 2)
         {
             yield return new ConversationPair
             {
                 UserQuestion = new Prompt
                 {
                     role = extractedTexts[i].Role,
-                    content = extractedTexts[i].Text    
+                    content = extractedTexts[i].Text
                 },
                 AssistantAnswer = new Prompt
                 {
-                    role = extractedTexts[i + 1].Role,  
+                    role = extractedTexts[i + 1].Role,
                     content = extractedTexts[i + 1].Text
                 }
             };
