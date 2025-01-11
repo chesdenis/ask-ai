@@ -1,7 +1,7 @@
 using AskAI.Infrastructure;
 using AskAI.Infrastructure.Abstractions;
-using AskAI.Infrastructure.Options;
 using AskAI.Services.Abstractions;
+using AskAI.Services.Apps;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -26,17 +26,17 @@ public static class DiContainers
         return services;
     }
 
-    public static IServiceCollection RegisterWriterListener(this IServiceCollection services,
-        IWatchOptions watchOptions)
+    public static IServiceCollection AddAppsComponents(this IServiceCollection services)
     {
         services.AddScoped<IFileWatcher, FileWatcher>();
         services.AddScoped<IFileSystemProvider, FileSystemProvider>();
         services.AddScoped<IWorkSpaceContext, WorkSpaceContext>();
         services.AddScoped<IAskPromptGenerator, AskPromptGenerator>();
-        services.AddScoped<IQuestionPromptsReader, QuestionPromptsReader>();
+        services.AddScoped<IQuestionsReader, QuestionsReader>();
         services.AddScoped<IConversationReader, ConversationReader>();
         services.AddScoped<IPromptEnricher, PromptEnricher>();
-        services.AddScoped<IWatchOptions>(_ => watchOptions);
+
+        services.AddScoped<AskAiConsoleMode>();
 
         return services;
     }

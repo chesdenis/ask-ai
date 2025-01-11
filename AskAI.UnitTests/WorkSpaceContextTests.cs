@@ -98,7 +98,7 @@ public class WorkSpaceContextTests
     private ServiceProvider BuildServices(Func<ServiceCollection, ServiceCollection>? factory = null)
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddScoped<IWatchOptions, IWatchOptions>(_ => new WatchFolderOptions
+        serviceCollection.AddScoped<IWatchOptions, IWatchOptions>(_ => new WatchOptions
         {
             WorkingFolder = "testPath",
             Verbose = false,

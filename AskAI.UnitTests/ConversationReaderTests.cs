@@ -63,7 +63,7 @@ public class ConversationReaderTests
 
         // Assert
         items.Should().HaveCount(1);
-        items[0].UserQuestion.role.Should().Be("user");
+        items[0].UserQuestion.role.Should().Be( ReservedKeywords.User);
         items[0].UserQuestion.content.Should().Be("This is a user question without role.");
     }
 
@@ -93,11 +93,11 @@ public class ConversationReaderTests
 
         // Assert
         items.Should().HaveCount(2);
-        items[0].UserQuestion.role.Should().Be("user");
+        items[0].UserQuestion.role.Should().Be( ReservedKeywords.User);
         items[0].UserQuestion.content.Should().Be("User question 1");
         items[0].AssistantAnswer.role.Should().Be("assistant");
         items[0].AssistantAnswer.content.Should().Be("Assistant answer 1");
-        items[1].UserQuestion.role.Should().Be("user");
+        items[1].UserQuestion.role.Should().Be( ReservedKeywords.User);
         items[1].UserQuestion.content.Should().Be("User question 2");
         items[1].AssistantAnswer.role.Should().Be("assistant");
         items[1].AssistantAnswer.content.Should().Be("Assistant answer 2");

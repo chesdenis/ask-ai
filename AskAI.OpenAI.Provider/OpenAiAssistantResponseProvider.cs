@@ -13,7 +13,7 @@ public class OpenAiAssistantResponseProvider(
     ILogger<OpenAiAssistantResponseProvider> logger) : IAssistantResponseProvider
 {
     public async Task<string> GetAssistantAnswer(
-        Prompt[] prompts, ModelDetails modelDetails,
+        Prompt[] prompts, 
         ApiRequestSettings requestSettings)
     {
         logger.LogDebug("Starting GetAssistantAnswer with model and endpoint: {Endpoint}", requestSettings.Endpoint);
@@ -27,19 +27,31 @@ public class OpenAiAssistantResponseProvider(
         };
 
         logger.LogDebug("Sending request to API.");
-        var response = await httpClient.PostAsJsonAsync(
-            requestSettings.Endpoint, new AiRequest
-            {
-                model = modelDetails.Model,
-                messages = prompts
-            }, opts);
 
-        response.EnsureSuccessStatusCode();
+        string resultAsString;
+        
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync(
+                requestSettings.Endpoint, new AiRequest
+                {
+                    model = requestSettings.Model,
+                    messages = prompts
+                }, opts);
 
-        var resultAsString = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
+            
+           
+            resultAsString = await response.Content.ReadAsStringAsync();
 
-        logger.LogDebug("Received response with size: {resultLength}", resultAsString.Length);
-
+            logger.LogDebug("Received response with size: {resultLength}", resultAsString.Length);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error while sending and handling request to API");
+            throw;
+        }
+        
         var result = JsonConvert.DeserializeObject<ChatCompletionResponse>(resultAsString);
 
         var message = result?.Choices.FirstOrDefault()?.Message;

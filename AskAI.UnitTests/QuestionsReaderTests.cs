@@ -1,4 +1,5 @@
 using AskAI.Infrastructure.Abstractions;
+using AskAI.Model;
 using AskAI.Services;
 using AskAI.Services.Abstractions;
 using FluentAssertions;
@@ -7,7 +8,7 @@ using NSubstitute;
 
 namespace AskAI.UnitTests;
 
-public class QuestionPromptsReaderTests
+public class QuestionsReaderTests
 {
     [Theory]
     [InlineData("Hello! How are you?", 1)]
@@ -24,25 +25,24 @@ public class QuestionPromptsReaderTests
         // Arrange
         var fileSystemProvider = Substitute.For<IFileSystemProvider>();
         fileSystemProvider.ReadAllTextAsync("testpath/testfile").Returns(Task.FromResult(inputText));
-        
+
         var parametersProvider = Substitute.For<IWorkSpaceContext>();
 
         // Act
         var sut = BuildServices(x =>
                 {
-                    x.AddScoped<IFileSystemProvider, IFileSystemProvider>(x=>fileSystemProvider);
-                    x.AddScoped<IWorkSpaceContext, IWorkSpaceContext>(x=>parametersProvider);
+                    x.AddScoped<IFileSystemProvider, IFileSystemProvider>(x => fileSystemProvider);
+                    x.AddScoped<IWorkSpaceContext, IWorkSpaceContext>(x => parametersProvider);
                     return x;
                 }
             )
-            .GetService<IQuestionPromptsReader>();
+            .GetService<IQuestionsReader>();
 
-        var prompts = await sut.ReadAsync("testpath/testfile");
-
+        var prompts = await sut.ReadAsync("testpath/testfile").ToListAsync();
         // Assert
         prompts.Should().HaveCount(expectedPromptCount);
     }
-    
+
     [Theory]
     [InlineData("This is an example \n of empty case")]
     public async Task GetPrompts_MustSupportEmptyInputCase(string inputText)
@@ -50,33 +50,33 @@ public class QuestionPromptsReaderTests
         // Arrange
         var fileSystemProvider = Substitute.For<IFileSystemProvider>();
         fileSystemProvider.ReadAllTextAsync("testpath/testfile").Returns(Task.FromResult(inputText));
-        
+
         var parametersProvider = Substitute.For<IWorkSpaceContext>();
 
         // Act
         var sut = BuildServices(x =>
                 {
-                    x.AddScoped<IFileSystemProvider, IFileSystemProvider>(x=>fileSystemProvider);
-                    x.AddScoped<IWorkSpaceContext, IWorkSpaceContext>(x=>parametersProvider);
+                    x.AddScoped<IFileSystemProvider, IFileSystemProvider>(x => fileSystemProvider);
+                    x.AddScoped<IWorkSpaceContext, IWorkSpaceContext>(x => parametersProvider);
                     return x;
                 }
             )
-            .GetService<IQuestionPromptsReader>();
+            .GetService<IQuestionsReader>();
 
-        var prompts = await sut.ReadAsync("testpath/testfile");
+        var prompts = await sut.ReadAsync("testpath/testfile").ToListAsync();
 
         // Assert
         prompts.Should().NotBeEmpty();
         prompts.Should().HaveCount(1);
-        
-        prompts[0].role.Trim().Should().Be("user");
+
+        prompts[0].role.Trim().Should().Be(ReservedKeywords.User);
         prompts[0].content.Trim().Should().Be("This is an example \n of empty case");
     }
 
     private ServiceProvider BuildServices(Func<ServiceCollection, ServiceCollection>? factory = null)
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddScoped<IQuestionPromptsReader, QuestionPromptsReader>();
+        serviceCollection.AddScoped<IQuestionsReader, QuestionsReader>();
         serviceCollection.AddLogging();
         serviceCollection = factory?.Invoke(serviceCollection) ?? serviceCollection;
         return serviceCollection.BuildServiceProvider();

@@ -41,13 +41,12 @@ Here is an example of good structure:
 
 ## How to use AskAI
 ### Answers formats:
-  - History here [your-file-name].history.md - this is all history of your conversation with AI model;
+  - Conversation here [your-file-name].conversation.md - this is all conversation with AI model;
   - Answer in [your-file-name].answer.md - this is last answer from AI model;
   - Short summary in [your-file-name].summary.md - this is summary of all your conversation;
 
 ### How to ask simple question:
-  - Run AskAI and type your general question, press enter and see results in created md file inside temp folder. If you want you can move that file to your workspace
-  - See answers and summary files
+  - Run AskAI and type your general question, press enter and see results in terminal
 
 ### How to ask question with context:
   - Create/Open any md file in your workspace (see "How to organize AI workspace") and put your question, for example:
@@ -71,8 +70,8 @@ Here is an example of good structure:
 ### How to reference to particular file or folder
   - Create/Open any md file in your workspace (see "How to organize AI workspace") and put your question, for example:
   ```markdown
-  I have some bicycle text description here @path-to-bicycle-description-with-text and set of usage cases in this folder @path-to-usage-cases-text
-  ---
-  I also wants to see more detail potential upgrade of this bicycle
+    I have some bicycle text description here @path-to-bicycle-description-with-text and set of usage cases in this folder @path-to-usage-cases-text
+    ---
+    I also wants to see more detail potential upgrade of this bicycle
   ```
   - See answers and summary files

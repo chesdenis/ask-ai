@@ -1,7 +1,73 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using AskAI.Infrastructure.Abstractions;
+using AskAI.OpenAI.Provider;
+using AskAI.Services.Apps;
+using AskAI.Services.DI;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
 
-Console.WriteLine("Hello, World!");
+namespace AskAI;
 
+internal class Program
+{
+    private static readonly ServiceCollection ServiceCollection = new();
+
+    static async Task Main(string[] args)
+    {
+        ConfigureServices(ServiceCollection);
+
+        var serviceProvider = ServiceCollection.BuildServiceProvider();
+
+        // Get the logger
+        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+
+        var cts = new CancellationTokenSource();
+        var ct = cts.Token;
+
+        Console.CancelKeyPress += (sender, eventArgs) =>
+        {
+            eventArgs.Cancel = true;
+            cts.Cancel();
+        };
+
+        try
+        {
+            logger.LogInformation("Starting application");
+
+            if (args.Length == 0)
+            {
+                // run regular simple question and answer mode
+                await serviceProvider.GetRequiredService<AskAiConsoleMode>().RunAsync(ct);
+            }
+
+            // Parser.Default.ParseArguments<ListenOptions>(args).WithParsed(RunOptionsAndReturnExitCode)
+            //     .WithNotParsed(HandleParseError);
+
+            // if (options == null)
+            // {
+            //     throw new Exception("Startup parameters are not set");
+            // }
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogCritical(ex, "Application terminated unexpectedly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
+
+    private static void ConfigureServices(IServiceCollection services)
+    {
+        services
+            .RegisterLogging()
+            .AddAppsComponents()
+            .AddScoped<IAssistantResponseProvider, OpenAiAssistantResponseProvider>()
+            .AddHttpClient();
+    }
+}
 
 // using System.Text;
 // using AskAI.Infrastructure.Abstractions;
@@ -21,59 +87,6 @@ Console.WriteLine("Hello, World!");
 //
 // internal class Program
 // {
-//     private static ListenOptions options = new ListenOptions();
-//     static readonly ServiceCollection serviceCollection = new();
-//
-//     static void Main(string[] args)
-//     {
-//         ConfigureServices(serviceCollection, options);
-//
-//         var serviceProvider = serviceCollection.BuildServiceProvider();
-//
-//         // Get the logger
-//         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-//
-//         var cts = new CancellationTokenSource();
-//         var ct = cts.Token;
-//
-//         Console.CancelKeyPress += (sender, eventArgs) =>
-//         {
-//             eventArgs.Cancel = true;
-//             cts.Cancel();
-//         };
-//
-//         try
-//         {
-//             logger.LogInformation("Starting application");
-//
-//             Parser.Default.ParseArguments<ListenOptions>(args).WithParsed(RunOptionsAndReturnExitCode)
-//                 .WithNotParsed(HandleParseError);
-//
-//             if (options == null)
-//             {
-//                 throw new Exception("Startup parameters are not set");
-//             }
-//
-//             AppEntryPoint(ct);
-//         }
-//         catch (Exception ex)
-//         {
-//             logger.LogCritical(ex, "Application terminated unexpectedly");
-//         }
-//         finally
-//         {
-//             Log.CloseAndFlush();
-//         }
-//     }
-//
-//     private static void ConfigureServices(IServiceCollection services, IListenOptions listenOptions)
-//     {
-//         services
-//             .RegisterLogging()
-//             .RegisterWriterListener(listenOptions)
-//             .AddScoped<IAssistantResponseProvider, OpenAiAssistantResponseProvider>()
-//             .AddHttpClient();
-//     }
 //
 //     static void RunOptionsAndReturnExitCode(ListenOptions opts)
 //     {

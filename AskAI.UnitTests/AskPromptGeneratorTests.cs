@@ -18,14 +18,14 @@ public class AskPromptGeneratorTests
         string[] assistantAndUserInput, string[] expectedOutput)
     {
         // Arrange
-        var userPrompts = userInput.Select(s => new Prompt() { role = "user", content = s }).ToArray();
+        var userPrompts = userInput.Select(s => new Prompt() { role =  ReservedKeywords.User, content = s }).ToArray();
 
         var assistantPrompts = new List<Prompt>();
         for (var i = 0; i < assistantAndUserInput.Length; i++)
         {
             assistantPrompts.Add(i % 2 == 0
                 ? new Prompt() { role = "assistant", content = assistantAndUserInput[i] }
-                : new Prompt() { role = "user", content = assistantAndUserInput[i] });
+                : new Prompt() { role =  ReservedKeywords.User, content = assistantAndUserInput[i] });
         }
 
         // Act

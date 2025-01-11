@@ -32,7 +32,7 @@ public class ConversationReader(
             {
                 UserQuestion = new Prompt
                 {
-                    role = "user",
+                    role = ReservedKeywords.User,
                     content = contents
                 }
             };

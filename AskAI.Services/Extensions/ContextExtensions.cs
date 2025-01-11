@@ -6,15 +6,17 @@ public static class ContextExtensions
 
     public static Task<string> GetAnswerFilePathAsync(this string filePath) => Task.FromResult($"{filePath}{GetAnswerSuffix()}");
 
-    public static string ResolveRequiredKey(string workingFolderPath, string keyName)
+    public static T ResolveRequiredKey<T>(string workingFolderPath, string keyName)
     {
         var keyPath = Path.Combine(workingFolderPath, keyName);
         if (!File.Exists(keyPath))
         {
             throw new ArgumentNullException(nameof(keyPath),
-                $"Key file not found in folder {workingFolderPath}");
+                $"Key file: {keyName} not found in folder {workingFolderPath}");
         }
 
-        return File.ReadAllText(keyPath);
+        var valueAsText = File.ReadAllText(keyPath);
+        
+        return (T)Convert.ChangeType(valueAsText, typeof(T));
     }
 }

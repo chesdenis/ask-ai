@@ -31,12 +31,12 @@ public class PromptEnricherTests
         var result = await sut.EnrichAsync([
             new Prompt
             {
-                role = "user",
+                role =  ReservedKeywords.User,
                 content = "write me hello world app"
             },
             new Prompt()
             {
-                role = "user",
+                role =  ReservedKeywords.User,
                 content = "Some additional response"
             }
         ], "test-file.md");

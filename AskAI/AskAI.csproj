@@ -28,5 +28,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\AskAI.Infrastructure\AskAI.Infrastructure.csproj" />
+      <ProjectReference Include="..\AskAI.OpenAI.Provider\AskAI.OpenAI.Provider.csproj" />
+      <ProjectReference Include="..\AskAI.Services\AskAI.Services.csproj" />
     </ItemGroup>
 </Project>
