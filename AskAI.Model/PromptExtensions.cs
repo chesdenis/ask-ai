@@ -1,8 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
-using AskAI.Model;
 
-namespace AskAI.Services.Extensions;
+namespace AskAI.Model;
 
 public static class PromptExtensions
 {

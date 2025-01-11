@@ -5,7 +5,7 @@ using AskAI.Services.Abstractions;
 
 namespace AskAI.Services;
 
-public class PromptEnricher(IUserPromptReader userPromptReader) : IPromptEnricher
+public class PromptEnricher(IWorkSpaceContext workSpaceContext) : IPromptEnricher
 {
     public async Task<Prompt[]> EnrichAsync(Prompt[] input, string filePath)
     {
@@ -22,7 +22,7 @@ public class PromptEnricher(IUserPromptReader userPromptReader) : IPromptEnriche
         }
         
         var firstPrompt = input.First();
-        var tags = await userPromptReader.GetTagsAsync(filePath);
+        var tags = await workSpaceContext.GetTagsAsync(filePath);
         if (tags.Length == 0)
         {
             return input;

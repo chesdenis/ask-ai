@@ -1,6 +1,6 @@
 namespace AskAI.Infrastructure.Abstractions;
 
-public interface IFileEventsNotifier
+public interface IFileWatcher
 {
     event EventHandler<FileSystemEventArgs> FileChanged;
     void Start(string path, string filter = "*.*", bool recursive = true);

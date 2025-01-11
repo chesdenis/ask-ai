@@ -8,7 +8,7 @@ namespace AITextWriter.Infrastructure.Integration_Tests;
 /// <summary>
 /// These tests are using temp folder and create few files to check that expected SUT works
 /// </summary>
-public class FileEventsNotifierTests
+public class FileWatcherTests
 {
     [Fact]
     public async Task FileChangedEventMustWork()
@@ -20,7 +20,7 @@ public class FileEventsNotifierTests
         Directory.CreateDirectory(testDirectory);
 
         // Act
-        var sut = BuildServices().GetService<IFileEventsNotifier>();
+        var sut = BuildServices().GetService<IFileWatcher>();
         bool changeWasTriggered = false;
         sut!.FileChanged += (sender, args) =>
         {
@@ -46,7 +46,7 @@ public class FileEventsNotifierTests
     private ServiceProvider BuildServices(Func<ServiceCollection, ServiceCollection>? factory = null)
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddScoped<IFileEventsNotifier, FileEventsNotifier>();
+        serviceCollection.AddScoped<IFileWatcher, FileWatcher>();
         serviceCollection.AddLogging();
         serviceCollection = factory?.Invoke(serviceCollection) ?? serviceCollection;
         return serviceCollection.BuildServiceProvider();

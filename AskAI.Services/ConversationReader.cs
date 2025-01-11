@@ -6,38 +6,40 @@ using AskAI.Services.Abstractions;
 
 namespace AskAI.Services;
 
-public class AssistantPromptReader(
-        IFileSystemProvider fileSystemProvider
-        ): IAssistantPromptReader
+public class ConversationReader(
+    IFileSystemProvider fileSystemProvider
+) : IConversationReader
 {
     // Regular expression to match sections starting with ### followed by role and the text
     private const string PromptSelectPattern = @"###\s*(user|assistant)\s*\n([\s\S]*?)(?=(###\s*(user|assistant)|$))";
 
-    public async Task<Prompt[]> GetPromptsAsync(string filePath)
-    { 
+    public async IAsyncEnumerable<ConversationPair> EnumerateAsync(string filePath)
+    {
         var answerFile = await filePath.GetAnswerFilePathAsync();
 
         if (!fileSystemProvider.FileExist(answerFile))
         {
-            return [];
+            yield break;
         }
 
         var contents = await fileSystemProvider.ReadAllTextAsync(answerFile);
-        
+
         // List to hold the extracted roles and text
         // case when there is no role specified
         if (!contents.Trim().StartsWith("###"))
         {
-            return
-            [
-                new Prompt
+            yield return new ConversationPair()
+            {
+                UserQuestion = new Prompt
                 {
                     role = "user",
                     content = contents
                 }
-            ];
+            };
+            
+            yield break;
         }
-        
+
         // List to hold the extracted roles and text
         List<(string Role, string Text)> extractedTexts = new();
 
@@ -48,10 +50,21 @@ public class AssistantPromptReader(
             extractedTexts.Add((role, text));
         }
 
-        return extractedTexts.Select(s => new Prompt
+        for (int i = 0; i < extractedTexts.Count; i+=2)
         {
-            role = s.Role,
-            content = s.Text
-        }).ToArray();
+            yield return new ConversationPair
+            {
+                UserQuestion = new Prompt
+                {
+                    role = extractedTexts[i].Role,
+                    content = extractedTexts[i].Text    
+                },
+                AssistantAnswer = new Prompt
+                {
+                    role = extractedTexts[i + 1].Role,  
+                    content = extractedTexts[i + 1].Text
+                }
+            };
+        }
     }
 }

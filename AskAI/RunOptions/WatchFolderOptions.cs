@@ -3,7 +3,7 @@ using CommandLine;
 
 namespace AskAI.RunOptions;
 
-public class ListenFolderFolderOptions : IListenFolderOptions
+public class WatchFolderOptions : IWatchOptions
 {
     [Option('w', "working-folder", Required = true, HelpText = "Path to working folder.")]
     public string WorkingFolder { get; set; }

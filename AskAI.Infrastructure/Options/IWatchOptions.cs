@@ -1,6 +1,6 @@
 namespace AskAI.Infrastructure.Options;
 
-public interface IListenFolderOptions
+public interface IWatchOptions
 {
     string WorkingFolder { get; set; }
     bool Verbose { get; set; }

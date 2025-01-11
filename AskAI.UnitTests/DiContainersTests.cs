@@ -13,7 +13,7 @@ public class DiContainersTests
     {
         // Arrange
         var services = new ServiceCollection();
-        var listenOptions = new ListenFolderFolderOptions
+        var listenOptions = new WatchFolderOptions
         {
             WorkingFolder = "testPath"
         };
@@ -25,9 +25,9 @@ public class DiContainersTests
         
         var serviceProvider = services.BuildServiceProvider();
         
-        var fileEventsNotifier = serviceProvider.GetRequiredService<IFileEventsNotifier>();
-        var userPromptReader = serviceProvider.GetRequiredService<IUserPromptReader>();
-        var assistancePromptReader = serviceProvider.GetRequiredService<IAssistantPromptReader>();
+        var fileEventsNotifier = serviceProvider.GetRequiredService<IFileWatcher>();
+        var userPromptReader = serviceProvider.GetRequiredService<IQuestionPromptsReader>();
+        var assistancePromptReader = serviceProvider.GetRequiredService<IConversationReader>();
         var askPromptGenerator = serviceProvider.GetRequiredService<IAskPromptGenerator>();
         var promptEnricher = serviceProvider.GetRequiredService<IPromptEnricher>();
         

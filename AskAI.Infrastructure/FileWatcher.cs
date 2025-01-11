@@ -2,7 +2,7 @@ using AskAI.Infrastructure.Abstractions;
 
 namespace AskAI.Infrastructure;
 
-public class FileEventsNotifier : IFileEventsNotifier
+public class FileWatcher : IFileWatcher
 {
     private FileSystemWatcher? _fileSystemWatcher;
 

@@ -1,3 +1,4 @@
+using AskAI.Infrastructure.Abstractions;
 using AskAI.Model;
 using AskAI.Services;
 using AskAI.Services.Abstractions;
@@ -13,15 +14,15 @@ public class PromptEnricherTests
     public async Task EnrichAsync_MustProduceCorrectResults()
     {
         // Arrange
-        var textModelContextProvider = Substitute.For<IUserPromptReader>();
-        textModelContextProvider.GetTagsAsync("test-file.md").Returns(Task.FromResult(new[]
+        var workSpaceContext = Substitute.For<IWorkSpaceContext>();
+        workSpaceContext.GetTagsAsync("test-file.md").Returns(Task.FromResult(new[]
             { "c#", "cloud", "story" }));
 
         // Act
         var sut = BuildServices(x =>
                 {
-                    x.AddScoped<IUserPromptReader, IUserPromptReader>(
-                        x => textModelContextProvider);
+                    x.AddScoped<IWorkSpaceContext, IWorkSpaceContext>(
+                        x => workSpaceContext);
                     return x;
                 }
             )

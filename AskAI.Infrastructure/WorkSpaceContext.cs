@@ -1,20 +1,18 @@
-using System.Text.RegularExpressions;
 using AskAI.Infrastructure.Abstractions;
-using AskAI.Model;
-using AskAI.Services.Abstractions;
+using AskAI.Infrastructure.Options;
 
-namespace AskAI.Services;
+namespace AskAI.Infrastructure;
 
-public class UserPromptReader(
-    IFileSystemProvider fileSystemProvider,
-    IWorkingContextParameters workingContextParameters) : IUserPromptReader
+public class WorkSpaceContext(IWatchOptions folderOptions, IFileSystemProvider fileSystemProvider)
+    : IWorkSpaceContext
 {
     private const string ApiKeyFileName = "apikey";
-    private const string PromptSelectPattern = @"\n{3,}";
-
+    
+    public Task<string> GetWorkingFolderPathAsync() => Task.FromResult(folderOptions.WorkingFolder);
+    
     public async Task<string[]> GetTagsAsync(string filePath)
     {
-        var workingPath = await workingContextParameters.GetWorkingFolderPathAsync();
+        var workingPath = await GetWorkingFolderPathAsync();
         var files = await fileSystemProvider.GetFilePathsAsync(
             workingPath,
             "*.", false);
@@ -25,17 +23,15 @@ public class UserPromptReader(
         tags.Remove(Path.GetFileNameWithoutExtension(filePath)); 
 
         // these are generator file if available (on MacOs/Linux can be)
-        tags.Remove("AITextWriterListen");
         tags.Remove("AskAI");
-        tags.Remove("AITextWriterSummarize");
         tags.Remove(ApiKeyFileName);
 
         return tags.ToArray()!;
     }
-
+    
     public async Task<string> GetApiKeyAsync()
     {
-        var workingFolder = await workingContextParameters.GetWorkingFolderPathAsync();
+        var workingFolder = await GetWorkingFolderPathAsync();
 
         var apiKeyPathSearchResults = await fileSystemProvider.GetFilePathsAsync(
             workingFolder,
@@ -59,33 +55,5 @@ public class UserPromptReader(
         }
 
         return apiKey;
-    }
-
-    public async Task<Prompt[]> GetPromptsAsync(string filePath)
-    {
-        var contents = await fileSystemProvider.ReadAllTextAsync(filePath);
-
-        var contentParts = Regex.Split(contents, PromptSelectPattern);
-        
-        // List to hold the extracted roles and text
-        List<(string Role, string Text)> extractedTexts = new();
-
-        foreach (var part in contentParts)
-        {
-            if (string.IsNullOrWhiteSpace(part))
-            {
-                continue;
-            }
-            
-            var role = "user";
-            var text = part;
-            extractedTexts.Add((role, text));
-        }
-
-        return extractedTexts.Select(s => new Prompt
-        {
-            role = s.Role,
-            content = s.Text
-        }).ToArray();
     }
 }

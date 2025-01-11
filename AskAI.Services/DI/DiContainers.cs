@@ -27,16 +27,16 @@ public static class DiContainers
     }
 
     public static IServiceCollection RegisterWriterListener(this IServiceCollection services,
-        IListenFolderOptions listenFolderOptions)
+        IWatchOptions watchOptions)
     {
-        services.AddScoped<IFileEventsNotifier, FileEventsNotifier>();
+        services.AddScoped<IFileWatcher, FileWatcher>();
         services.AddScoped<IFileSystemProvider, FileSystemProvider>();
-        services.AddScoped<IWorkingContextParameters, WorkingContextParameters>();
+        services.AddScoped<IWorkSpaceContext, WorkSpaceContext>();
         services.AddScoped<IAskPromptGenerator, AskPromptGenerator>();
-        services.AddScoped<IUserPromptReader, UserPromptReader>();
-        services.AddScoped<IAssistantPromptReader, AssistantPromptReader>();
+        services.AddScoped<IQuestionPromptsReader, QuestionPromptsReader>();
+        services.AddScoped<IConversationReader, ConversationReader>();
         services.AddScoped<IPromptEnricher, PromptEnricher>();
-        services.AddScoped<IListenFolderOptions>(_ => listenFolderOptions);
+        services.AddScoped<IWatchOptions>(_ => watchOptions);
 
         return services;
     }
