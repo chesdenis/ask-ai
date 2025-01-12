@@ -2,7 +2,9 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using AskAI.Infrastructure.Abstractions;
 using AskAI.Model;
+using AskAI.OpenAI.Provider.Convertors;
 using AskAI.OpenAI.Provider.Request;
+using AskAI.OpenAI.Provider.Response;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -36,7 +38,7 @@ public class OpenAiAssistantResponseProvider(
                 requestSettings.Endpoint, new AiRequest
                 {
                     model = requestSettings.Model,
-                    messages = prompts
+                    messages = prompts.ToAiEntryRequest().ToArray()
                 }, opts);
 
             response.EnsureSuccessStatusCode();

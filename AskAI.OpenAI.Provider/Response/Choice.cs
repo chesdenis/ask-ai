@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace AskAI.OpenAI.Provider.Request;
+namespace AskAI.OpenAI.Provider.Response;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class Choice

@@ -1,10 +1,9 @@
 using System.Text.RegularExpressions;
 using AskAI.Infrastructure.Abstractions;
-using AskAI.Services.Abstractions;
 
-namespace AskAI.Services;
+namespace AskAI.Infrastructure;
 
-public class PromptLinksCollector(IWorkSpaceContext workSpaceContext) : IPromptLinksCollector
+public class FileSystemLinksCollector(IWorkSpaceContext workSpaceContext) : IFileSystemLinksCollector
 {
     public IEnumerable<string> Collect(string contents)
     {
