@@ -16,11 +16,9 @@ public class AskAiDocumentMode(
 {
     public async Task RunAsync(string workingFilePath, CancellationToken ct)
     {
-        var documentContent = await File.ReadAllTextAsync(workingFilePath, ct);
-
         logger.LogInformation("Incoming file: {WorkingFilePath}", workingFilePath);
 
-        var questionPrompts = await questionsReader.ReadAsync(documentContent).ToListAsync(cancellationToken: ct);
+        var questionPrompts = await questionsReader.ReadAsync(workingFilePath).ToListAsync(cancellationToken: ct);
         var enrichedPrompts = await promptEnricher.EnrichAsync(questionPrompts.ToArray(), workingFilePath);
         var existedConversation = await conversationReader.EnumerateConversationPairsAsync(workingFilePath)
             .ToListAsync(cancellationToken: ct);
@@ -49,45 +47,68 @@ public class AskAiDocumentMode(
             logger.LogInformation("No prompts to ask.");
             return;
         }
-
-        if (conversationPairs.Last().AssistantAnswer != null)
+        
+        // here we need to reconstruct answers and question tree
+        // if something was changed in conversation backbone we need to reflect this.
+        for (var pairIndex = 0; pairIndex < conversationPairs.Count; pairIndex++)
         {
-            logger.LogInformation("Last question was answered.");
-            return;
+            var pair = conversationPairs[pairIndex];
+            if (pair.AssistantAnswer != null)
+            {
+                logger.LogInformation("This question {question} was answered.", pair.UserQuestionHash);
+                continue;
+            }
+            
+            var conversationPairsToAsk = conversationPairs.Take(pairIndex + 1).ToPrompts().ToArray();
+
+            var assistantAnswer = await
+                assistantResponseProvider.GetAssistantAnswer(conversationPairsToAsk,
+                    apiRequestSettings);
+            
+            pair.AssistantAnswer = new Prompt
+            {
+                role = ReservedKeywords.Assistant,
+                content = assistantAnswer
+            };
+            
+            await assistantAnswersWriter
+                .WriteConversationAsync(
+                    conversationPairs.ToPrompts().ToArray(),
+                    workingFilePath);
         }
-
-        var assistantAnswer = await
-            assistantResponseProvider.GetAssistantAnswer(conversationPairs.ToPrompts().ToArray(),
-                apiRequestSettings);
-
-        conversationPairs.Last().AssistantAnswer = new Prompt
-        {
-            role = ReservedKeywords.Assistant,
-            content = assistantAnswer
-        };
-
-        await assistantAnswersWriter
-            .WriteConversationAsync(
-                conversationPairs.ToPrompts().ToArray(),
-                workingFilePath);
+        
+        
     }
 
     private List<ConversationPair> BuildConversationPairs(
         List<ConversationPair> existedConversation, 
         Prompt[] enrichedPrompts)
     {
+        // this is to not evaluate hash multiple times during next loops
         var existedConversationsWithHashes = existedConversation.Select(s => new
         {
             s.UserQuestion,
-            UserQuestionHash = s.UserQuestion.ToStringHash(),
+            s.UserQuestionHash,
             s.AssistantAnswer,
-            AssistantAnswerHash = s.AssistantAnswer?.ToStringHash()
+            s.AssistantAnswerHash
         }).ToList();
 
         var conversationPairs = new List<ConversationPair>();
 
+        bool foundFirstMissingAnswers = false;
         foreach (var prompt in enrichedPrompts)
         {
+            // this is because in case if we spot something which changes the conversation tree
+            if (foundFirstMissingAnswers)
+            {
+                conversationPairs.Add(new ConversationPair
+                {
+                    UserQuestion = prompt,
+                    AssistantAnswer = null
+                });
+                continue;
+            }
+            
             var userQuestionHash = prompt.ToStringHash();
 
             var existedPair = existedConversationsWithHashes
@@ -95,6 +116,7 @@ public class AskAiDocumentMode(
 
             if (existedPair != null)
             {
+                logger.LogInformation("Found existing answer for question: {UserQuestion}", existedPair.UserQuestion);
                 conversationPairs.Add(new ConversationPair
                 {
                     UserQuestion = existedPair.UserQuestion,
@@ -108,6 +130,8 @@ public class AskAiDocumentMode(
                     UserQuestion = prompt,
                     AssistantAnswer = null
                 });
+
+                foundFirstMissingAnswers = true;
             }
         }
 

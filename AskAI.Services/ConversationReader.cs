@@ -59,11 +59,13 @@ public class ConversationReader(
                     role = extractedTexts[i].Role,
                     content = extractedTexts[i].Text
                 },
-                AssistantAnswer = new Prompt
-                {
-                    role = extractedTexts[i + 1].Role,
-                    content = extractedTexts[i + 1].Text
-                }
+                AssistantAnswer = (i + 1) > extractedTexts.Count - 1
+                    ? null
+                    : new Prompt
+                    {
+                        role = extractedTexts[i + 1].Role,
+                        content = extractedTexts[i + 1].Text
+                    }
             };
         }
     }

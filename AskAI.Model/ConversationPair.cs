@@ -7,5 +7,5 @@ public record ConversationPair
     public Prompt? AssistantAnswer { get; set; }
 
     public string UserQuestionHash => UserQuestion.ToStringHash();
-    public string AssistantAnswerHash => UserQuestion.ToStringHash();
+    public string AssistantAnswerHash => AssistantAnswer?.ToStringHash() ?? string.Empty;
 }

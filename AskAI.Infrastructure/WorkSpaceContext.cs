@@ -1,12 +1,11 @@
 using AskAI.Infrastructure.Abstractions;
+using AskAI.Model;
 
 namespace AskAI.Infrastructure;
 
 public class WorkSpaceContext(IFileSystemProvider fileSystemProvider)
     : IWorkSpaceContext
 {
-    private const string ApiKeyFileName = "apikey";
-    
     public async Task<string[]> GetTagsAsync(string filePath)
     {
         var workingPath = Path.GetDirectoryName(filePath);
@@ -20,9 +19,11 @@ public class WorkSpaceContext(IFileSystemProvider fileSystemProvider)
         tags.Remove(Path.GetFileNameWithoutExtension(filePath)); 
 
         // these are generator file if available (on MacOs/Linux can be)
-        tags.Remove("AskAI");
-        tags.Remove(ApiKeyFileName);
-
+        tags.Remove(ReservedKeywords.TimeoutMinutes);
+        tags.Remove(ReservedKeywords.Model);
+        tags.Remove(ReservedKeywords.Endpoint);
+        tags.Remove(ReservedKeywords.ApiKey);
+        tags.Remove(ReservedKeywords.AskAI);
         return tags.ToArray()!;
     }
 }

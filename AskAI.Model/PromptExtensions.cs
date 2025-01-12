@@ -9,7 +9,7 @@ public static class PromptExtensions
     {
         using var md5 = MD5.Create();
         
-        var contentBytes = Encoding.UTF8.GetBytes(prompt.content);
+        var contentBytes = Encoding.UTF8.GetBytes(prompt.content.Trim());
         var hashBytes = md5.ComputeHash(contentBytes);
         var hashStringBuilder = new StringBuilder();
         foreach (var b in hashBytes)
