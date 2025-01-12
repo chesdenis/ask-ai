@@ -5,7 +5,7 @@ using AskAI.Services.Abstractions;
 
 namespace AskAI.Services;
 
-public partial class QuestionsReader(
+public class QuestionsReader(
     IFileSystemProvider fileSystemProvider) : IQuestionsReader
 {
     private const string PromptSelectPattern = "---";
@@ -14,7 +14,7 @@ public partial class QuestionsReader(
     {
         var contents = await fileSystemProvider.ReadAllTextAsync(filePath);
 
-        var contentParts = QuestionPromptRegex().Split(contents);
+        var contentParts = new Regex(PromptSelectPattern).Split(contents);
 
         foreach (var part in contentParts)
         {
@@ -34,6 +34,4 @@ public partial class QuestionsReader(
         }
     }
 
-    [GeneratedRegex(PromptSelectPattern)]
-    private static partial Regex QuestionPromptRegex();
 }

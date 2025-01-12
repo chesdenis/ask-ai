@@ -19,8 +19,31 @@ public class AssistantAnswersWriter(IFileSystemProvider fileSystemProvider) : IA
             sb.AppendLine();
         }
 
-        var conversationFilePath = await workingDocument.GetConversationFilePathAsync();
+        var outputFilePath = await workingDocument.GetConversationFilePathAsync();
 
-        await fileSystemProvider.WriteAllTextAsync(conversationFilePath, sb.ToString());
+        await fileSystemProvider.WriteAllTextAsync(outputFilePath, sb.ToString());
+    }
+
+    public async Task WriteAnswerAsync(IEnumerable<Prompt> prompts, string workingDocument)
+    {
+        var sb = new StringBuilder();
+
+        var lastPrompt = prompts.LastOrDefault();
+        if (lastPrompt != null)
+        {
+            sb.AppendLine(lastPrompt.content);
+            sb.AppendLine();
+        }
+
+        var outputFilePath = await workingDocument.GetAnswerFilePathAsync();
+
+        await fileSystemProvider.WriteAllTextAsync(outputFilePath, sb.ToString());
+    }
+    
+    public async Task WriteSummaryAsync(string summary, string workingDocument)
+    {
+        var outputFilePath = await workingDocument.GetSummaryFilePathAsync();
+
+        await fileSystemProvider.WriteAllTextAsync(outputFilePath, summary);
     }
 }

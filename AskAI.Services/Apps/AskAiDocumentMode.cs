@@ -76,7 +76,27 @@ public class AskAiDocumentMode(
                     conversationPairs.ToPrompts().ToArray(),
                     workingFilePath);
         }
+
+        await assistantAnswersWriter.WriteAnswerAsync(
+            conversationPairs.ToPrompts().ToArray(), 
+            workingFilePath);
         
+        var summaryAnswer = await
+            assistantResponseProvider.GetAssistantAnswer(
+                conversationPairs.Concat([
+                    new ConversationPair
+                    {
+                        UserQuestion = new Prompt
+                        {
+                            role = ReservedKeywords.User,
+                            content = "Provide short summary of overall conversation"
+                        },
+                        AssistantAnswer = null
+                    }
+                ]).ToPrompts().ToArray(), 
+                apiRequestSettings);
+        
+        await assistantAnswersWriter.WriteSummaryAsync(summaryAnswer, workingFilePath);
         
     }
 

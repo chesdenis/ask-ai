@@ -40,7 +40,6 @@ public class OpenAiAssistantResponseProvider(
                 }, opts);
 
             response.EnsureSuccessStatusCode();
-            
            
             resultAsString = await response.Content.ReadAsStringAsync();
 
