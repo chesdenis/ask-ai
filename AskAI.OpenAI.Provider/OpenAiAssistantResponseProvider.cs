@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using AskAI.Infrastructure.Abstractions;
 using AskAI.Model;
+using AskAI.OpenAI.Provider.Abstraction;
 using AskAI.OpenAI.Provider.Convertors;
 using AskAI.OpenAI.Provider.Request;
 using AskAI.OpenAI.Provider.Response;
@@ -12,6 +13,7 @@ namespace AskAI.OpenAI.Provider;
 
 public class OpenAiAssistantResponseProvider(
     IHttpClientFactory httpClientFactory,
+    IOpenAiPromptsConvertors openAiPromptsConvertors,
     ILogger<OpenAiAssistantResponseProvider> logger) : IAssistantResponseProvider
 {
     public async Task<string> GetAssistantAnswer(
@@ -23,10 +25,10 @@ public class OpenAiAssistantResponseProvider(
         using var httpClient = httpClientFactory.CreateClient();
         ConfigureHttpClient(httpClient,requestSettings);
 
-        var opts = new JsonSerializerOptions
-        {
-            TypeInfoResolver = AppJsonSerializedContext.Default
-        };
+        // var opts = new JsonSerializerOptions
+        // {
+        //     TypeInfoResolver = AppJsonSerializedContext.Default
+        // };
 
         logger.LogDebug("Sending request to API.");
 
@@ -34,12 +36,14 @@ public class OpenAiAssistantResponseProvider(
         
         try
         {
+            var aiRequest = new AiRequest
+            {
+                model = requestSettings.Model,
+                messages = openAiPromptsConvertors.ToAiEntryRequest(prompts).ToArray()
+            };
+            
             var response = await httpClient.PostAsJsonAsync(
-                requestSettings.Endpoint, new AiRequest
-                {
-                    model = requestSettings.Model,
-                    messages = prompts.ToAiEntryRequest().ToArray()
-                }, opts);
+                requestSettings.Endpoint, aiRequest);
 
             response.EnsureSuccessStatusCode();
            

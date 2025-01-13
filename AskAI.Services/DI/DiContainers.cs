@@ -1,6 +1,8 @@
 using AskAI.Infrastructure;
 using AskAI.Infrastructure.Abstractions;
 using AskAI.OpenAI.Provider;
+using AskAI.OpenAI.Provider.Abstraction;
+using AskAI.OpenAI.Provider.Convertors;
 using AskAI.Services.Abstractions;
 using AskAI.Services.Apps;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +32,8 @@ public static class DiContainers
     public static IServiceCollection AddAppsComponents(this IServiceCollection services)
     {
         services.AddScoped<IAssistantResponseProvider, OpenAiAssistantResponseProvider>()
-            .AddHttpClient();
+            .AddHttpClient()
+            .AddScoped<IOpenAiPromptsConvertors, OpenAiPromptsConvertors>();
         
         services.AddScoped<IFileWatcher, FileWatcher>();
         services.AddScoped<IFileSystemProvider, FileSystemProvider>();
@@ -40,6 +43,7 @@ public static class DiContainers
         services.AddScoped<IConversationReader, ConversationReader>();
         services.AddScoped<IPromptEnricher, PromptEnricher>();
         services.AddScoped<IAssistantAnswersWriter, AssistantAnswersWriter>();
+        services.AddScoped<IFileSystemLinksCollector, FileSystemLinksCollector>();
 
         services.AddScoped<AskAiConsoleMode>();
         services.AddScoped<AskAiDocumentMode>();

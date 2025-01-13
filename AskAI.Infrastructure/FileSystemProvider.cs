@@ -138,4 +138,10 @@ public class FileSystemProvider(ILogger<FileSystemProvider> logger) : IFileSyste
             throw;
         }
     }
+    
+    public string EncodeAsBase64(string filePathToEncode)
+    {
+        byte[] imageArray = File.ReadAllBytes(filePathToEncode);
+        return Convert.ToBase64String(imageArray);
+    }
 }
