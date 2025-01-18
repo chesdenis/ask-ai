@@ -17,10 +17,30 @@ public class OpenAiPromptsConvertors(
                 links = fileSystemLinksCollector.Collect(p.content),
                 p.content
             })
-            .Select(s => new AiPromptRequest
+            .Select(s =>
             {
-                role = s.role,
-                content = ToContent(s.links, s.content).ToArray()
+                if(s.role == ReservedKeywords.User)
+                {
+                    return new AiPromptRequest
+                    {
+                        role = s.role,
+                        content = ToContent(s.links, s.content).ToArray()
+                    };
+                }
+
+                return new AiPromptRequest()
+                {
+                    role = s.role,
+                    content =
+                    [
+                        new AiPromptEntryRequest
+                        {
+                            { "type", "text" },
+                            { "text", s.content }
+                        }
+                    ]
+                };
+
             });
     }
 
@@ -43,7 +63,9 @@ public class OpenAiPromptsConvertors(
                 });
             }
 
-            enrichedContent.Add(ToLinkEntryRequest(link));
+            var aiPromptEntryRequest = ToLinkEntryRequest(link);
+
+            enrichedContent.Add(aiPromptEntryRequest);
 
             currentIndex = linkIndex + link.Key.Length;
         }
@@ -74,6 +96,22 @@ public class OpenAiPromptsConvertors(
                         new Dictionary<string, string>()
                             { { "url", $"data:image/jpeg;base64,{fileSystemProvider.EncodeAsBase64(link.Value)}" } }
                     }
+                };
+            case ".md":
+            case ".cs":
+            case ".txt":
+            case ".json":
+            case ".xml":
+            case ".yaml":
+            case ".js":
+            case ".ts":
+                return new AiPromptEntryRequest()
+                {
+                    { "type", "text" },
+                    { "text", fileSystemProvider.ReadAllTextAsync(link.Value)
+                        .ConfigureAwait(false)
+                        .GetAwaiter()
+                        .GetResult() }
                 };
             default:
                 throw new NotSupportedException($"File type {Path.GetExtension(link.Value)} is not supported");

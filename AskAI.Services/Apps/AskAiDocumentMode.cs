@@ -96,15 +96,15 @@ public class AskAiDocumentMode(
                 ]).ToPrompts().ToArray(), 
                 apiRequestSettings);
         
-        await assistantAnswersWriter.WriteSummaryAsync(summaryAnswer, workingFilePath);
-        
+        // TODO: need to determine is it needed to write summary
+        //await assistantAnswersWriter.WriteSummaryAsync(summaryAnswer, workingFilePath);
     }
 
     private List<ConversationPair> BuildConversationPairs(
         List<ConversationPair> existedConversation, 
         Prompt[] enrichedPrompts)
     {
-        // this is to not evaluate hash multiple times during next loops
+        // this is to not calculate hash multiple times during next loops
         var existedConversationsWithHashes = existedConversation.Select(s => new
         {
             s.UserQuestion,
@@ -119,6 +119,8 @@ public class AskAiDocumentMode(
         foreach (var prompt in enrichedPrompts)
         {
             // this is because in case if we spot something which changes the conversation tree
+            // we need to reflect this in the conversation tree
+            // we need to assign null to assistant answers for next questions
             if (foundFirstMissingAnswers)
             {
                 conversationPairs.Add(new ConversationPair

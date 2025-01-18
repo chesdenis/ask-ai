@@ -8,6 +8,11 @@ namespace AskAI.Services;
 
 public class AssistantAnswersWriter(IFileSystemProvider fileSystemProvider) : IAssistantAnswersWriter
 {
+    public async Task WriteQuestionAsync(string question, string workingDocument)
+    {
+        await fileSystemProvider.WriteAllTextAsync(workingDocument, question);
+    }
+
     public async Task WriteConversationAsync(IEnumerable<Prompt> prompts, string workingDocument)
     {
         var sb = new StringBuilder();

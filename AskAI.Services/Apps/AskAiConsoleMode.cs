@@ -1,16 +1,18 @@
 using AskAI.Infrastructure.Abstractions;
 using AskAI.Model;
+using AskAI.Services.Abstractions;
 using AskAI.Services.Extensions;
-using Microsoft.Extensions.Logging;
 
 namespace AskAI.Services.Apps;
 
-public class AskAiConsoleMode(IAssistantResponseProvider assistantResponseProvider, ILogger<AskAiConsoleMode> logger)
+public class AskAiConsoleMode(
+    IAssistantResponseProvider assistantResponseProvider,
+    IAssistantAnswersWriter assistantAnswersWriter)
 {
     public async Task RunAsync(CancellationToken ct)
     {
         var baseDir = AppContext.BaseDirectory;
-        
+
         var apiRequestSettings = new ApiRequestSettings
         {
             ApiKey = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.ApiKey),
@@ -19,56 +21,73 @@ public class AskAiConsoleMode(IAssistantResponseProvider assistantResponseProvid
             TimeoutMinutes = ContextExtensions.ResolveRequiredKey<int>(baseDir, ReservedKeywords.TimeoutMinutes),
         };
 
-        Console.WriteLine("Hello! Console mode is running. Base directory: {0}", baseDir);
-        Console.WriteLine("What would you like to ask?");
+        Console.WriteLine(":) -> ask here : {0}", baseDir);
+        var questionText = Console.ReadLine();
 
-        var conversation = new List<ConversationPair>();
-
-        while (true)
+        if (string.IsNullOrWhiteSpace(questionText))
         {
-            if (ct.IsCancellationRequested)
-            {
-                break;
-            }
-            
-            var questionText = Console.ReadLine();
-            
-            if (string.IsNullOrWhiteSpace(questionText))
-            {
-                continue;
-            }
-
-            var promptsToSend = conversation.ToPrompts().ToList();
-            promptsToSend.Add(new Prompt()
-            {
-                role = ReservedKeywords.User,
-                content = questionText
-            });
-
-            var answerText = await assistantResponseProvider.GetAssistantAnswer(
-                promptsToSend.ToArray(), apiRequestSettings
-            )!.TryWithFallbackValueAs(null);
-
-            if (answerText != null)
-            {
-                logger.LogInformation(answerText);
-                
-                conversation.Add(new ConversationPair()
-                {
-                    UserQuestion = new Prompt
-                    {
-                        role = ReservedKeywords.User,
-                        content = questionText
-                    },
-                    AssistantAnswer = new Prompt
-                    {
-                        role = ReservedKeywords.Assistant,
-                        content = answerText
-                    }
-                });
-            }
+            Console.WriteLine(" :((( -> no question asked");
+            return;
         }
 
-        Console.WriteLine("Console mode terminated");
+        var answerText = await assistantResponseProvider.GetAssistantAnswer(
+            [
+                new Prompt()
+                {
+                    role = ReservedKeywords.User,
+                    content = questionText
+                }
+            ], apiRequestSettings
+        )!.TryWithFallbackValueAs(null);
+
+        var fileNameToStore = await assistantResponseProvider.GetAssistantAnswer(
+        [
+            new Prompt()
+            {
+                role = ReservedKeywords.User,
+                content = answerText + Environment.NewLine +
+                          ". Based on that answer, give me file name to store this conversation as md file. But as output just show me file name without any text"
+            }
+        ], apiRequestSettings);
+
+        if (answerText != null)
+        {
+            fileNameToStore = fileNameToStore
+                .Trim()
+                .ToLowerInvariant()
+                .Replace(" ", "-")
+                .Replace("\"", "");
+            
+            Console.WriteLine($"Answer: {answerText}, File: {fileNameToStore}");
+
+            var conversationPair = new ConversationPair()
+            {
+                UserQuestion = new Prompt
+                {
+                    role = ReservedKeywords.User,
+                    content = questionText
+                },
+                AssistantAnswer = new Prompt
+                {
+                    role = ReservedKeywords.Assistant,
+                    content = answerText
+                }
+            };
+
+            var workingFilePath = Path.Combine(baseDir, fileNameToStore);
+
+            var prompts = new[] { conversationPair }.ToPrompts().ToArray();
+
+            await assistantAnswersWriter.WriteQuestionAsync(questionText, workingFilePath);
+            
+            await assistantAnswersWriter
+                .WriteConversationAsync(
+                    prompts,
+                    workingFilePath);
+
+            await assistantAnswersWriter.WriteAnswerAsync(
+                prompts,
+                workingFilePath);
+        }
     }
 }
