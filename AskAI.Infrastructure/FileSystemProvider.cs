@@ -23,7 +23,7 @@ public class FileSystemProvider(ILogger<FileSystemProvider> logger) : IFileSyste
         }
     }
     
-    public IEnumerable<string> EnumerateFiles(IEnumerable<string> linksOfFilesOrDirs)
+    public IEnumerable<string> EnumerateFilesRecursive(IEnumerable<string> linksOfFilesOrDirs)
     {
         foreach (var p in linksOfFilesOrDirs)
         {
@@ -126,15 +126,28 @@ public class FileSystemProvider(ILogger<FileSystemProvider> logger) : IFileSyste
         }
     }
 
-    public bool FileExist(string filePath)
+    public bool IsFileExist(string path)
     {
         try
         {
-            return File.Exists(filePath);
+            return File.Exists(path);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error checking if file exists {FilePath}", filePath);
+            logger.LogError(e, "Error checking if file exists {FilePath}", path);
+            throw;
+        }
+    }
+
+    public bool IsDirectoryExist(string path)
+    {
+        try
+        {
+            return Directory.Exists(path);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error checking if directory exists {Path}", path);
             throw;
         }
     }

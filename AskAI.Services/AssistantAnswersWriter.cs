@@ -44,11 +44,4 @@ public class AssistantAnswersWriter(IFileSystemProvider fileSystemProvider) : IA
 
         await fileSystemProvider.WriteAllTextAsync(outputFilePath, sb.ToString());
     }
-    
-    public async Task WriteSummaryAsync(string summary, string workingDocument)
-    {
-        var outputFilePath = await workingDocument.GetSummaryFilePathAsync();
-
-        await fileSystemProvider.WriteAllTextAsync(outputFilePath, summary);
-    }
 }

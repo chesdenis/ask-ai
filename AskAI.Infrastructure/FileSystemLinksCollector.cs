@@ -1,11 +1,12 @@
 using System.Text.RegularExpressions;
 using AskAI.Infrastructure.Abstractions;
+using AskAI.Model;
 
 namespace AskAI.Infrastructure;
 
-public class FileSystemLinksCollector() : IFileSystemLinksCollector
+public class FileSystemLinksCollector : IFileSystemLinksCollector
 {
-    public IEnumerable<KeyValuePair<string, string>> Collect(string contents)
+    public IEnumerable<FileSystemLink> Collect(string contents)
     {
         var patterns = new[]
         {
@@ -18,9 +19,12 @@ public class FileSystemLinksCollector() : IFileSystemLinksCollector
         foreach (Match match in new Regex(pattern).Matches(contents))
         {
             var key = match.Groups[0].Value.Trim();
-            string pathToFile = match.Groups[1].Value.Trim();
+            string pathToFsLink = match.Groups[1].Value.Trim();
             
-            yield return new KeyValuePair<string, string>(key, pathToFile);
+            yield return new FileSystemLink
+            {
+                Path = pathToFsLink
+            };
         }
     }
 }

@@ -5,7 +5,7 @@ using AskAI.Services.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace AskAI.Services.Apps;
-
+ 
 public class AskAiDocumentMode(
     IAssistantResponseProvider assistantResponseProvider,
     IQuestionsReader questionsReader,
@@ -80,24 +80,6 @@ public class AskAiDocumentMode(
         await assistantAnswersWriter.WriteAnswerAsync(
             conversationPairs.ToPrompts().ToArray(), 
             workingFilePath);
-        
-        var summaryAnswer = await
-            assistantResponseProvider.GetAssistantAnswer(
-                conversationPairs.Concat([
-                    new ConversationPair
-                    {
-                        UserQuestion = new Prompt
-                        {
-                            role = ReservedKeywords.User,
-                            content = "Provide short summary of overall conversation"
-                        },
-                        AssistantAnswer = null
-                    }
-                ]).ToPrompts().ToArray(), 
-                apiRequestSettings);
-        
-        // TODO: need to determine is it needed to write summary
-        //await assistantAnswersWriter.WriteSummaryAsync(summaryAnswer, workingFilePath);
     }
 
     private List<ConversationPair> BuildConversationPairs(

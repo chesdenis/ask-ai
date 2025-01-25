@@ -4,11 +4,9 @@ public static class ContextExtensions
 {
     private const string ConversationSuffix = ".conversation.md";
     private const string AnswerSuffix = ".answer.md";
-    private const string SummarySuffix = ".summary.md";
 
     public static Task<string> GetConversationFilePathAsync(this string filePath) => Task.FromResult($"{filePath}{ConversationSuffix}");
     public static Task<string> GetAnswerFilePathAsync(this string filePath) => Task.FromResult($"{filePath}{AnswerSuffix}");
-    public static Task<string> GetSummaryFilePathAsync(this string filePath) => Task.FromResult($"{filePath}{SummarySuffix}");
 
     public static T ResolveRequiredKey<T>(string workingFolderPath, string keyName)
     {

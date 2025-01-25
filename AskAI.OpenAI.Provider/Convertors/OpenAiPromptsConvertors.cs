@@ -24,7 +24,7 @@ public class OpenAiPromptsConvertors(
                     return new AiPromptRequest
                     {
                         role = s.role,
-                        content = ToContent(s.links, s.content).ToArray()
+                        content = InjectLinksIntoContent(s.links, s.content).ToArray()
                     };
                 }
 
@@ -44,57 +44,87 @@ public class OpenAiPromptsConvertors(
             });
     }
 
-    private IEnumerable<AiPromptEntryRequest> ToContent(IEnumerable<KeyValuePair<string, string>> links, string content)
+    private IEnumerable<AiPromptEntryRequest> InjectLinksIntoContent(IEnumerable<FileSystemLink> links, string content)
     {
-        var enrichedContent = new List<AiPromptEntryRequest>();
+        var result = new List<AiPromptEntryRequest>();
         int currentIndex = 0;
 
         foreach (var link in links)
         {
-            int linkIndex = content.IndexOf(link.Key, currentIndex, StringComparison.Ordinal);
+            var linkIndex = content.IndexOf(link.Path, currentIndex, StringComparison.Ordinal);
             if (linkIndex == -1) continue;
 
             if (linkIndex > currentIndex)
             {
-                enrichedContent.Add(new AiPromptEntryRequest
+                result.Add(new AiPromptEntryRequest
                 {
                     { "type", "text" },
                     { "text", content.Substring(currentIndex, linkIndex - currentIndex) }
                 });
             }
 
-            var aiPromptEntryRequest = ToLinkEntryRequest(link);
+            var linkExpandedContent = ProcessLink(link);
 
-            enrichedContent.Add(aiPromptEntryRequest);
+            result.AddRange(linkExpandedContent);
 
-            currentIndex = linkIndex + link.Key.Length;
+            currentIndex = linkIndex + link.Path.Length;
         }
 
         if (currentIndex < content.Length)
         {
-            enrichedContent.Add(new AiPromptEntryRequest
+            result.Add(new AiPromptEntryRequest
             {
                 { "type", "text" },
                 { "text", content[currentIndex..] }
             });
         }
 
-        return enrichedContent;
+        return result;
     }
 
-    private AiPromptEntryRequest ToLinkEntryRequest(KeyValuePair<string, string> link)
+    private IEnumerable<AiPromptEntryRequest> ProcessLink(FileSystemLink link)
     {
-        switch (Path.GetExtension(link.Value).ToLowerInvariant())
+        var isDirectory = fileSystemProvider.IsDirectoryExist(link.Path);
+
+        return isDirectory ? ProcessAsDirectory(link) : [ProcessPath(link.Path)];
+    }
+    
+    private IEnumerable<AiPromptEntryRequest> ProcessAsDirectory(FileSystemLink link)
+    {
+        var files = fileSystemProvider.EnumerateFilesRecursive([link.Path]);
+        var baseDirectory = fileSystemProvider.CalculateBaseDirectory(files);
+
+        yield return new AiPromptEntryRequest
+        {
+            { "type", "text" },
+            { "text", $"I have this folder {baseDirectory}, and here are details of each file:" }
+        };
+
+        foreach (var filePath in files)
+        {
+            yield return new AiPromptEntryRequest()
+            {
+                { "type", "text" },
+                { "text", $"File {Path.GetFileName(filePath)}, " +
+                          $"located here {Path.GetRelativePath(baseDirectory,filePath)} with this content: " }
+            };
+            yield return ProcessPath(filePath);
+        }
+    }
+    
+    private AiPromptEntryRequest ProcessPath(string path)
+    {
+        switch (Path.GetExtension(path).ToLowerInvariant())
         {
             case ".jpg":
             case ".jpeg":
-                return new AiPromptEntryRequest()
+                return new AiPromptEntryRequest
                 {
                     { "type", "image_url" },
                     {
                         "image_url",
                         new Dictionary<string, string>()
-                            { { "url", $"data:image/jpeg;base64,{fileSystemProvider.EncodeAsBase64(link.Value)}" } }
+                            { { "url", $"data:image/jpeg;base64,{fileSystemProvider.EncodeAsBase64(path)}" } }
                     }
                 };
             case ".md":
@@ -105,16 +135,16 @@ public class OpenAiPromptsConvertors(
             case ".yaml":
             case ".js":
             case ".ts":
-                return new AiPromptEntryRequest()
+                return new AiPromptEntryRequest
                 {
                     { "type", "text" },
-                    { "text", fileSystemProvider.ReadAllTextAsync(link.Value)
+                    { "text", fileSystemProvider.ReadAllTextAsync(path)
                         .ConfigureAwait(false)
                         .GetAwaiter()
                         .GetResult() }
                 };
             default:
-                throw new NotSupportedException($"File type {Path.GetExtension(link.Value)} is not supported");
+                throw new NotSupportedException($"File type {Path.GetExtension(path)} is not supported");
         }
     }
 }

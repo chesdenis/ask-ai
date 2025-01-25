@@ -16,7 +16,7 @@ public class ConversationReaderTests
     {
         // Arrange
         var fileSystemProvider = Substitute.For<IFileSystemProvider>();
-        fileSystemProvider.FileExist(Arg.Any<string>()).Returns(false);
+        fileSystemProvider.IsFileExist(Arg.Any<string>()).Returns(false);
 
         var sut = BuildServices(x =>
                 {
@@ -43,7 +43,7 @@ public class ConversationReaderTests
     {
         // Arrange
         var fileSystemProvider = Substitute.For<IFileSystemProvider>();
-        fileSystemProvider.FileExist(Arg.Any<string>()).Returns(true);
+        fileSystemProvider.IsFileExist(Arg.Any<string>()).Returns(true);
         fileSystemProvider.ReadAllTextAsync(Arg.Any<string>()).Returns(Task.FromResult("This is a user question without role."));
 
         var sut = BuildServices(x =>
@@ -73,7 +73,7 @@ public class ConversationReaderTests
     {
         // Arrange
         var fileSystemProvider = Substitute.For<IFileSystemProvider>();
-        fileSystemProvider.FileExist(Arg.Any<string>()).Returns(true);
+        fileSystemProvider.IsFileExist(Arg.Any<string>()).Returns(true);
         fileSystemProvider.ReadAllTextAsync(Arg.Any<string>()).Returns(Task.FromResult("### user\nUser question 1\n### assistant\nAssistant answer 1\n### user\nUser question 2\n### assistant\nAssistant answer 2"));
 
         var sut = BuildServices(x =>

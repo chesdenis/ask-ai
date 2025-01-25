@@ -45,7 +45,6 @@ internal class Program
                 // run app with question document
                 await serviceProvider.GetRequiredService<AskAiDocumentMode>().RunAsync(args[0], ct);
             }
-            
         }
         catch (Exception ex)
         {

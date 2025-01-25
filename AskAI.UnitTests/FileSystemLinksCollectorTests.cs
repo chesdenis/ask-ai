@@ -22,7 +22,7 @@ public class FileSystemLinksCollectorTests
         var result = sut.Collect(input).ToArray();
 
         // Assert
-        result.Select(s=>s.Value).Should().BeEquivalentTo(expectedOutput);
+        result.Select(s=>s.Path).Should().BeEquivalentTo(expectedOutput);
     }
     
     

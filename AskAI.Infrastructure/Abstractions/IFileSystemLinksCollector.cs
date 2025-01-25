@@ -1,6 +1,8 @@
+using AskAI.Model;
+
 namespace AskAI.Infrastructure.Abstractions;
 
 public interface IFileSystemLinksCollector
 {
-    IEnumerable<KeyValuePair<string, string>> Collect(string contents);
+    IEnumerable<FileSystemLink> Collect(string contents);
 }

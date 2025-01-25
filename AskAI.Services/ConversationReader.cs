@@ -17,7 +17,7 @@ public class ConversationReader(
     {
         var answerFile = await questionFilePath.GetConversationFilePathAsync();
 
-        if (!fileSystemProvider.FileExist(answerFile))
+        if (!fileSystemProvider.IsFileExist(answerFile))
         {
             yield break;
         }
