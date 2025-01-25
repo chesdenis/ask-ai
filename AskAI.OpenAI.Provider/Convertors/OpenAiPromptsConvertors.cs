@@ -51,7 +51,7 @@ public class OpenAiPromptsConvertors(
 
         foreach (var link in links)
         {
-            var linkIndex = content.IndexOf(link.Path, currentIndex, StringComparison.Ordinal);
+            var linkIndex = content.IndexOf(link.Key, currentIndex, StringComparison.Ordinal);
             if (linkIndex == -1) continue;
 
             if (linkIndex > currentIndex)
@@ -67,7 +67,7 @@ public class OpenAiPromptsConvertors(
 
             result.AddRange(linkExpandedContent);
 
-            currentIndex = linkIndex + link.Path.Length;
+            currentIndex = linkIndex + link.Key.Length;
         }
 
         if (currentIndex < content.Length)

@@ -23,7 +23,8 @@ public class FileSystemLinksCollector : IFileSystemLinksCollector
             
             yield return new FileSystemLink
             {
-                Path = pathToFsLink
+                Path = pathToFsLink,
+                Key = key
             };
         }
     }
