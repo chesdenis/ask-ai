@@ -43,7 +43,6 @@ Here is an example of good structure:
 ### Answers formats:
   - Conversation here [your-file-name].conversation.md - this is all conversation with AI model;
   - Answer in [your-file-name].answer.md - this is last answer from AI model;
-  - Short summary in [your-file-name].summary.md - this is summary of all your conversation;
 
 ### How to ask simple question:
   - Run AskAI and type your general question, press enter and see results in terminal
@@ -53,7 +52,7 @@ Here is an example of good structure:
   ```markdown
     Describe me something about cycling
   ```
-  - See answers and summary files
+  - See answers files
 
 ### How to ask sequence of questions with context
   - Create/Open any md file in your workspace (see "How to organize AI workspace") and put your question, for example:
@@ -65,7 +64,7 @@ Here is an example of good structure:
     Expand me weight aspects
   ```
   - Save file and run AskAI for that file using this format: AskAI <path to file>
-  - See answers and summary files
+  - See answers files
 
 ### How to reference to particular file or folder
   - Create/Open any md file in your workspace (see "How to organize AI workspace") and put your question, for example:
