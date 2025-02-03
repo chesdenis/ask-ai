@@ -19,7 +19,7 @@ public class OpenAiPromptsConvertors(
             })
             .Select(s =>
             {
-                if(s.role == ReservedKeywords.User)
+                if (s.role == ReservedKeywords.User)
                 {
                     return new AiPromptRequest
                     {
@@ -40,7 +40,6 @@ public class OpenAiPromptsConvertors(
                         }
                     ]
                 };
-
             });
     }
 
@@ -88,7 +87,7 @@ public class OpenAiPromptsConvertors(
 
         return isDirectory ? ProcessAsDirectory(link) : [ProcessPath(link.Path)];
     }
-    
+
     private IEnumerable<AiPromptEntryRequest> ProcessAsDirectory(FileSystemLink link)
     {
         var files = fileSystemProvider.EnumerateFilesRecursive([link.Path]);
@@ -105,13 +104,15 @@ public class OpenAiPromptsConvertors(
             yield return new AiPromptEntryRequest()
             {
                 { "type", "text" },
-                { "text", $"File {Path.GetFileName(filePath)}, " +
-                          $"located here {Path.GetRelativePath(baseDirectory,filePath)} with this content: " }
+                {
+                    "text", $"File {Path.GetFileName(filePath)}, " +
+                            $"located here {Path.GetRelativePath(baseDirectory, filePath)} with this content: "
+                }
             };
             yield return ProcessPath(filePath);
         }
     }
-    
+
     private AiPromptEntryRequest ProcessPath(string path)
     {
         switch (Path.GetExtension(path).ToLowerInvariant())
@@ -135,13 +136,18 @@ public class OpenAiPromptsConvertors(
             case ".yaml":
             case ".js":
             case ".ts":
+            case ".aspx":
+            case ".asp":
+            case ".vb":
                 return new AiPromptEntryRequest
                 {
                     { "type", "text" },
-                    { "text", fileSystemProvider.ReadAllTextAsync(path)
-                        .ConfigureAwait(false)
-                        .GetAwaiter()
-                        .GetResult() }
+                    {
+                        "text", fileSystemProvider.ReadAllTextAsync(path)
+                            .ConfigureAwait(false)
+                            .GetAwaiter()
+                            .GetResult()
+                    }
                 };
             default:
                 throw new NotSupportedException($"File type {Path.GetExtension(path)} is not supported");

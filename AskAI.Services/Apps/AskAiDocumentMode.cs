@@ -32,7 +32,7 @@ public class AskAiDocumentMode(
 
     private async Task ProcessAssistantStep(string workingFilePath, List<ConversationPair> conversationPairs)
     {
-        var baseDir = AppContext.BaseDirectory;
+        var baseDir = Path.GetDirectoryName(workingFilePath);
 
         var apiRequestSettings = new ApiRequestSettings
         {
