@@ -40,10 +40,13 @@ internal class Program
                 await serviceProvider.GetRequiredService<AskAiConsoleMode>().RunAsync(ct);
             }
 
-            if (args.Length == 1)
+            if (args.Length > 0)
             {
+                // for document mode we expect to pass 2 arguments - language model, and document file link
                 // run app with question document
-                await serviceProvider.GetRequiredService<AskAiDocumentMode>().RunAsync(args[0], ct);
+                await serviceProvider.GetRequiredService<AskAiDocumentMode>().RunAsync(
+                    args[0], 
+                    args[1], ct);
             }
         }
         catch (Exception ex)

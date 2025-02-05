@@ -16,7 +16,7 @@ public class AskAiConsoleMode(
         var apiRequestSettings = new ApiRequestSettings
         {
             ApiKey = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.ApiKey),
-            Model = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.Model),
+            Model = string.Empty, // model is not passing in console app, it depends on default in specific provider
             Endpoint = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.Endpoint),
             TimeoutMinutes = ContextExtensions.ResolveRequiredKey<int>(baseDir, ReservedKeywords.TimeoutMinutes),
         };

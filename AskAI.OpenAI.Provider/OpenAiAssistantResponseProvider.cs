@@ -38,7 +38,7 @@ public class OpenAiAssistantResponseProvider(
         {
             var aiRequest = new AiRequest
             {
-                model = requestSettings.Model,
+                model = string.IsNullOrWhiteSpace(requestSettings.Model) ? "gpt-4o" : requestSettings.Model,
                 messages = openAiPromptsConvertors.ToAiEntryRequest(prompts).ToArray()
             };
             

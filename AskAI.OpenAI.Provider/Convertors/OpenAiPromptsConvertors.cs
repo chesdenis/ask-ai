@@ -139,6 +139,10 @@ public class OpenAiPromptsConvertors(
             case ".aspx":
             case ".asp":
             case ".vb":
+            case ".master":
+            case ".htm":
+            case ".html":
+            case ".csv":
                 return new AiPromptEntryRequest
                 {
                     { "type", "text" },

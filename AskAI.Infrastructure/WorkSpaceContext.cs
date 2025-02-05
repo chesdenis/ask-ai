@@ -20,7 +20,6 @@ public class WorkSpaceContext(IFileSystemProvider fileSystemProvider)
 
         // these are generator file if available (on MacOs/Linux can be)
         tags.Remove(ReservedKeywords.TimeoutMinutes);
-        tags.Remove(ReservedKeywords.Model);
         tags.Remove(ReservedKeywords.Endpoint);
         tags.Remove(ReservedKeywords.ApiKey);
         tags.Remove(ReservedKeywords.AskAI);

@@ -14,7 +14,7 @@ public class AskAiDocumentMode(
     IAssistantAnswersWriter assistantAnswersWriter,
     ILogger<AskAiDocumentMode> logger)
 {
-    public async Task RunAsync(string workingFilePath, CancellationToken ct)
+    public async Task RunAsync(string workingFilePath, string languageModel, CancellationToken ct)
     {
         logger.LogInformation("Incoming file: {WorkingFilePath}", workingFilePath);
 
@@ -25,19 +25,19 @@ public class AskAiDocumentMode(
 
         var conversationPairs = BuildConversationPairs(existedConversation, enrichedPrompts);
 
-        await ProcessAssistantStep(workingFilePath, conversationPairs);
+        await ProcessAssistantStep(workingFilePath, languageModel, conversationPairs);
         
         logger.LogInformation("Process finished for file: {WorkingFilePath}", workingFilePath);
     }
 
-    private async Task ProcessAssistantStep(string workingFilePath, List<ConversationPair> conversationPairs)
+    private async Task ProcessAssistantStep(string workingFilePath, string languageModel, List<ConversationPair> conversationPairs)
     {
         var baseDir = Path.GetDirectoryName(workingFilePath);
 
         var apiRequestSettings = new ApiRequestSettings
         {
             ApiKey = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.ApiKey),
-            Model = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.Model),
+            Model = languageModel,
             Endpoint = ContextExtensions.ResolveRequiredKey<string>(baseDir, ReservedKeywords.Endpoint),
             TimeoutMinutes = ContextExtensions.ResolveRequiredKey<int>(baseDir, ReservedKeywords.TimeoutMinutes),
         };
