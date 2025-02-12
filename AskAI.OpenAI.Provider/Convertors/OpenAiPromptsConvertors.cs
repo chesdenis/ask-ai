@@ -143,6 +143,7 @@ public class OpenAiPromptsConvertors(
             case ".htm":
             case ".html":
             case ".csv":
+            case ".tsx":
                 return new AiPromptEntryRequest
                 {
                     { "type", "text" },
