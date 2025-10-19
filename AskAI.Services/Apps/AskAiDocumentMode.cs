@@ -18,6 +18,23 @@ public class AskAiDocumentMode(
     {
         logger.LogInformation("Incoming file: {WorkingFilePath}", workingFilePath);
 
+        if (Directory.Exists(workingFilePath))
+        {
+            // working file is a folder, we need to process all files in it
+            var files = Directory.GetFiles(workingFilePath);
+            foreach (var file in files)
+            {
+                await ProcessSingleFile(file, languageModel, ct);
+            }
+        }
+        else
+        {
+            await ProcessSingleFile(workingFilePath, languageModel, ct);
+        }
+    }
+
+    private async Task ProcessSingleFile(string workingFilePath, string languageModel, CancellationToken ct)
+    {
         var questionPrompts = await questionsReader.ReadAsync(workingFilePath).ToListAsync(cancellationToken: ct);
         var enrichedPrompts = await promptEnricher.EnrichAsync(questionPrompts.ToArray(), workingFilePath);
         var existedConversation = await conversationReader.EnumerateConversationPairsAsync(workingFilePath)
