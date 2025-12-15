@@ -13,6 +13,11 @@ public static class ContextExtensions
 
     public static T ResolveRequiredKey<T>(string workingFolderPath, string keyName)
     {
+        var envVar = Environment.GetEnvironmentVariable(keyName);
+        
+        if(envVar != null)
+            return (T)Convert.ChangeType(envVar, typeof(T));
+        
         var keyPath = Path.Combine(workingFolderPath, keyName);
         
         if (!File.Exists(keyPath))
